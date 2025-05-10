@@ -3,7 +3,7 @@
 A customizable and lightweight Flutter calendar widget package for list-based day selections with user-defined decorations.
 
 ---
-![MCalendar Preview](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/docs/calendar_preview.png)
+![MCalendar Preview](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png)
 
 
 ## ✨ Features
@@ -22,4 +22,4 @@ Add the package in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^0.0.1
+  m_calendar: ^0.0.2
