@@ -1,0 +1,20 @@
+name: m_calendar
+description: "A customizable and lightweight Flutter calendar widget package supporting day and list-based selections with user-defined decorations."
+version: 0.0.1
+homepage: https://github.com/MuntasirAsif/m_calendar
+repository: https://github.com/MuntasirAsif/m_calendar
+issue_tracker: https://github.com/MuntasirAsif/m_calendar/issues
+
+environment:
+  sdk: ^3.7.2
+  flutter: ">=2.5.0"
+
+dependencies:
+  flutter:
+    sdk: flutter
+  provider: ^6.1.5
+
+dev_dependencies:
+  flutter_test:
+    sdk: flutter
+  flutter_lints: ^3.0.0
