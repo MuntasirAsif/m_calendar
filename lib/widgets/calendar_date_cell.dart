@@ -6,52 +6,57 @@ import '../model/selectedDateModel.dart';
 class CalendarDateCell extends StatelessWidget {
   final int i;
   final BoxDecoration? defaultDecoration;
+  final Widget? defaultChild;
+  final Widget? userSelectedDecoration;
 
-  const CalendarDateCell({super.key, required this.i, this.defaultDecoration});
+  const CalendarDateCell({
+    super.key,
+    required this.i,
+    this.defaultDecoration,
+    this.defaultChild,
+    this.userSelectedDecoration,
+  });
 
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<CalenderTableProvider>(context, listen: false);
+    final provider = Provider.of<CalenderTableProvider>(
+      context,
+    ); // listen: true
 
-    final selectedDecoration =
-        provider.selectedDaysList
-            .firstWhere(
-              (model) => model.selectedDateList.contains(i),
-              orElse:
-                  () => SelectedDaysModel(
-                    selectedDateList: [],
-                    decoration:
-                        defaultDecoration ??
-                        BoxDecoration(
-                          color: Colors.teal.shade100,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                  ),
-            )
-            .decoration;
+    // Check for custom decorations
+    final selectedModel = provider.selectedDaysList.firstWhere(
+      (model) => model.selectedDateList.contains(i),
+      orElse:
+          () => SelectedDaysModel(
+            selectedDateList: [],
+            decoration:
+                defaultDecoration ??
+                BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+          ),
+    );
 
-    final child =
-        provider.selectedDaysList
-            .firstWhere(
-              (model) => model.selectedDateList.contains(i),
-              orElse:
-                  () => SelectedDaysModel(
-                    selectedDateList: [],
-                    decoration:
-                        defaultDecoration ??
-                        BoxDecoration(
-                          color: Colors.teal.shade100,
-                          borderRadius: BorderRadius.circular(6),
-                        ),
-                  ),
-            )
-            .child;
+    final selectedDecoration = selectedModel.decoration;
+    final child = selectedModel.child;
 
-    return Container(
-      padding: const EdgeInsets.all(12),
-      margin: const EdgeInsets.all(4),
-      decoration: selectedDecoration,
-      child: child ?? Center(child: Text(i.toString())),
+    // Use default or override based on selection mode
+    final bool isSelected =
+        provider.isRangeSelection
+            ? provider.isInRange(i)
+            : provider.userPicked == i;
+
+    return GestureDetector(
+      onTap: () => provider.toggleUserPicked(i),
+      child: Container(
+        padding: const EdgeInsets.all(12),
+        margin: const EdgeInsets.all(4),
+        decoration: selectedDecoration.copyWith(
+          color: isSelected ? Colors.teal.shade400 : selectedDecoration.color,
+        ),
+        child: child ?? defaultChild ?? Center(child: Text(i.toString())),
+      ),
     );
   }
 }

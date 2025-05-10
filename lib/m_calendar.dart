@@ -1,14 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:m_calendar/provider/calender_table_provider.dart';
+import 'package:m_calendar/widgets/calendar_date_cell.dart';
 import 'package:provider/provider.dart';
+
 import 'model/selectedDateModel.dart';
-import 'widgets/calendar_date_cell.dart';
 
 class MCalendar extends StatelessWidget {
   final DateTime? selectedMonth;
   final BoxDecoration? decoration;
   final List<SelectedDaysModel>? selectedDaysList;
   final TextStyle? weekNameHeaderStyle;
+  final Widget? defaultChild;
+  final bool? isRangeSelection;
 
   const MCalendar({
     super.key,
@@ -16,6 +19,8 @@ class MCalendar extends StatelessWidget {
     this.decoration,
     this.selectedDaysList,
     this.weekNameHeaderStyle,
+    this.defaultChild,
+    this.isRangeSelection,
   });
 
   @override
@@ -26,6 +31,7 @@ class MCalendar extends StatelessWidget {
               CalenderTableProvider()..initializeMonth(
                 selectedMonth ?? DateTime.now(),
                 selectedDaysList,
+                isRangeSelection ?? false,
               ),
       child: Scaffold(
         appBar: AppBar(title: const Text('MCalendar')),
@@ -37,22 +43,23 @@ class MCalendar extends StatelessWidget {
                   children: [
                     TableRow(
                       children:
-                          provider.weekNameList
-                              .map(
-                                (name) => Center(
-                                  child: Text(
-                                    name,
-                                    style: weekNameHeaderStyle?? const TextStyle(
+                          provider.weekNameList.map((name) {
+                            return Center(
+                              child: Text(
+                                name,
+                                style:
+                                    weekNameHeaderStyle ??
+                                    const TextStyle(
                                       fontWeight: FontWeight.bold,
                                     ),
-                                  ),
-                                ),
-                              )
-                              .toList(),
+                              ),
+                            );
+                          }).toList(),
                     ),
                     ...generateCalendarRows(
                       provider: provider,
                       decoration: decoration,
+                      defaultChild: defaultChild,
                     ),
                   ],
                 ),
@@ -65,6 +72,7 @@ class MCalendar extends StatelessWidget {
   }
 
   List<TableRow> generateCalendarRows({
+    Widget? defaultChild,
     BoxDecoration? decoration,
     required CalenderTableProvider provider,
   }) {
@@ -75,7 +83,13 @@ class MCalendar extends StatelessWidget {
     }
 
     for (int i = 1; i <= provider.totalDays; i++) {
-      dayCells.add(CalendarDateCell(i: i, defaultDecoration: decoration));
+      dayCells.add(
+        CalendarDateCell(
+          i: i,
+          defaultDecoration: decoration,
+          defaultChild: defaultChild,
+        ),
+      );
     }
 
     while (dayCells.length % 7 != 0) {
