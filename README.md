@@ -3,6 +3,7 @@
 A customizable and lightweight Flutter calendar widget package for list-based day selections with user-defined decorations.
 
 ---
+![MCalendar Preview](https://raw.githubusercontent.com/MuntasirAsif/your-repo/main/assets/calendar_preview.png)
 
 ## ✨ Features
 

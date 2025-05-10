@@ -8,19 +8,25 @@ class MCalendar extends StatelessWidget {
   final DateTime? selectedMonth;
   final BoxDecoration? decoration;
   final List<SelectedDaysModel>? selectedDaysList;
+  final TextStyle? weekNameHeaderStyle;
 
   const MCalendar({
     super.key,
     this.selectedMonth,
     this.decoration,
     this.selectedDaysList,
+    this.weekNameHeaderStyle,
   });
 
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CalenderTableProvider()
-        ..initializeMonth(selectedMonth ?? DateTime.now(), selectedDaysList),
+      create:
+          (_) =>
+              CalenderTableProvider()..initializeMonth(
+                selectedMonth ?? DateTime.now(),
+                selectedDaysList,
+              ),
       child: Scaffold(
         appBar: AppBar(title: const Text('MCalendar')),
         body: Consumer<CalenderTableProvider>(
@@ -30,16 +36,19 @@ class MCalendar extends StatelessWidget {
                 Table(
                   children: [
                     TableRow(
-                      children: provider.weekNameList
-                          .map((name) => Center(
-                        child: Text(
-                          name,
-                          style: const TextStyle(
-                            fontWeight: FontWeight.bold,
-                          ),
-                        ),
-                      ))
-                          .toList(),
+                      children:
+                          provider.weekNameList
+                              .map(
+                                (name) => Center(
+                                  child: Text(
+                                    name,
+                                    style: weekNameHeaderStyle?? const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                                  ),
+                                ),
+                              )
+                              .toList(),
                     ),
                     ...generateCalendarRows(
                       provider: provider,
@@ -66,9 +75,7 @@ class MCalendar extends StatelessWidget {
     }
 
     for (int i = 1; i <= provider.totalDays; i++) {
-      dayCells.add(
-        CalendarDateCell(i: i, defaultDecoration: decoration),
-      );
+      dayCells.add(CalendarDateCell(i: i, defaultDecoration: decoration));
     }
 
     while (dayCells.length % 7 != 0) {
