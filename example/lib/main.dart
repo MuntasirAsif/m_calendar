@@ -34,7 +34,7 @@ class MyApp extends StatelessWidget {
                     BoxShadow(
                       color: Colors.orange.shade100,
                       blurRadius: 6,
-                      offset: Offset(2, 2),
+                      offset: const Offset(2, 2),
                     )
                   ],
                 ),
@@ -48,11 +48,11 @@ class MyApp extends StatelessWidget {
                     BoxShadow(
                       color: Colors.purple.shade100,
                       blurRadius: 6,
-                      offset: Offset(2, 2),
+                      offset: const Offset(2, 2),
                     )
                   ],
                 ),
-                child: Icon(Icons.star, color: Colors.white, size: 20),
+                child: const Icon(Icons.star, color: Colors.white, size: 20),
               ),
             ],
           ),

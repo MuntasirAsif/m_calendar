@@ -3,7 +3,13 @@ import '../model/selectedDateModel.dart';
 
 class CalenderTableProvider extends ChangeNotifier {
   final List<String> weekNameList = [
-    'Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri',
+    'Sat',
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
   ];
 
   late int _startOffset;
@@ -16,7 +22,10 @@ class CalenderTableProvider extends ChangeNotifier {
   int get totalDays => _totalDays;
   DateTime get selectedMonth => _selectedMonth;
 
-  void initializeMonth(DateTime selectedMonth, [List<SelectedDaysModel>? customList]) {
+  void initializeMonth(
+    DateTime selectedMonth, [
+    List<SelectedDaysModel>? customList,
+  ]) {
     _selectedMonth = selectedMonth;
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     _startOffset = (firstDay.weekday % 7);
