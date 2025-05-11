@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:m_calendar/m_calendar.dart';
-import 'package:m_calendar/model/selectedDateModel.dart';
+import 'package:m_calendar/model/selected_date_model.dart';
 
 void main() {
   runApp(const MyApp());
