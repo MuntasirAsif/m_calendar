@@ -7,14 +7,14 @@ class CalendarDateCell extends StatelessWidget {
   final int i;
   final BoxDecoration? defaultDecoration;
   final Widget? defaultChild;
-  final Widget? userSelectedDecoration;
+  final Widget? userSelectedItemStyle;
 
   const CalendarDateCell({
     super.key,
     required this.i,
     this.defaultDecoration,
     this.defaultChild,
-    this.userSelectedDecoration,
+    this.userSelectedItemStyle,
   });
 
   @override
