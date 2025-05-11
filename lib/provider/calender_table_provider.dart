@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/selectedDateModel.dart';
+import '../model/selected_date_model.dart';
 
 class CalenderTableProvider extends ChangeNotifier {
   final List<String> weekNameList = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
@@ -23,6 +23,8 @@ class CalenderTableProvider extends ChangeNotifier {
   int? get rangeStart => _rangeStart;
   int? get rangeEnd => _rangeEnd;
 
+
+  /// Initializes the calendar month data and selection mode
   void initializeMonth(
       DateTime selectedMonth,
       List<SelectedDaysModel>? customList,
@@ -44,7 +46,7 @@ class CalenderTableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-
+  /// Handles user tapping on a day
   void toggleUserPicked(int index) {
     if (isRangeSelection) {
       if (_rangeStart == null || (_rangeStart != null && _rangeEnd != null)) {
@@ -72,6 +74,8 @@ class CalenderTableProvider extends ChangeNotifier {
     return false;
   }
 
+
+  /// Toggles between single and range selection mode
   void toggleSelectionMode(bool selectionMode) {
     isRangeSelection = selectionMode;
     isRangeSelection = !isRangeSelection;
