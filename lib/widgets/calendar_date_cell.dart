@@ -8,7 +8,6 @@ import '../model/selected_date_model.dart';
 /// This widget handles its own selection logic based on the [CalenderTableProvider]
 /// and applies custom decorations or children if provided.
 class CalendarDateCell extends StatelessWidget {
-
   /// Creates a [CalendarDateCell] widget.
   ///
   /// This widget displays a styled date cell that reacts to user interaction
@@ -20,6 +19,7 @@ class CalendarDateCell extends StatelessWidget {
     this.defaultChild,
     this.userSelectedItemStyle,
   });
+
   /// The index or identifier for this date cell (usually the day number).
   final int i;
 
@@ -38,24 +38,27 @@ class CalendarDateCell extends StatelessWidget {
 
     // Find if this day is in the custom selected list
     final selectedModel = provider.selectedDaysList.firstWhere(
-          (model) => model.selectedDateList.contains(i),
-      orElse: () => SelectedDaysModel(
-        selectedDateList: [],
-        decoration: defaultDecoration ??
-            BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-      ),
+      (model) => model.selectedDateList.contains(i),
+      orElse:
+          () => SelectedDaysModel(
+            selectedDateList: [],
+            decoration:
+                defaultDecoration ??
+                BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+          ),
     );
 
     final selectedDecoration = selectedModel.decoration;
     final child = selectedModel.child;
 
     // Determine if this day is selected
-    final bool isSelected = provider.isRangeSelection
-        ? provider.isInRange(i)
-        : provider.userPicked == i;
+    final bool isSelected =
+        provider.isRangeSelection
+            ? provider.isInRange(i)
+            : provider.userPicked == i;
 
     return GestureDetector(
       onTap: () => provider.toggleUserPicked(i),

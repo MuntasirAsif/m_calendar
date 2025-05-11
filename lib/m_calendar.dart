@@ -11,7 +11,6 @@ import 'model/selected_date_model.dart';
 /// The calendar provides flexibility through decoration, styling, and custom
 /// day cell content. It uses a [ChangeNotifierProvider] to manage calendar state.
 class MCalendar extends StatelessWidget {
-
   /// Creates an [MCalendar] widget with optional styling and configuration.
   const MCalendar({
     super.key,
@@ -22,6 +21,7 @@ class MCalendar extends StatelessWidget {
     this.defaultChild,
     this.isRangeSelection,
   });
+
   /// Specifies the initially selected month displayed in the calendar.
   final DateTime? selectedMonth;
 
@@ -43,12 +43,13 @@ class MCalendar extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CalenderTableProvider()
-        ..initializeMonth(
-          selectedMonth ?? DateTime.now(),
-          selectedDaysList,
-          isRangeSelection ?? false,
-        ),
+      create:
+          (_) =>
+              CalenderTableProvider()..initializeMonth(
+                selectedMonth ?? DateTime.now(),
+                selectedDaysList,
+                isRangeSelection ?? false,
+              ),
       child: Scaffold(
         appBar: AppBar(title: const Text('MCalendar')),
         body: Consumer<CalenderTableProvider>(
@@ -59,17 +60,19 @@ class MCalendar extends StatelessWidget {
                 Table(
                   children: [
                     TableRow(
-                      children: provider.weekNameList.map((name) {
-                        return Center(
-                          child: Text(
-                            name,
-                            style: weekNameHeaderStyle ??
-                                const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        );
-                      }).toList(),
+                      children:
+                          provider.weekNameList.map((name) {
+                            return Center(
+                              child: Text(
+                                name,
+                                style:
+                                    weekNameHeaderStyle ??
+                                    const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            );
+                          }).toList(),
                     ),
 
                     /// Render calendar day cells in weekly rows

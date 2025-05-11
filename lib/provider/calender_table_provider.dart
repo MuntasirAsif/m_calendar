@@ -8,7 +8,15 @@ import '../model/selected_date_model.dart';
 /// UI components accordingly.
 class CalenderTableProvider extends ChangeNotifier {
   /// List of week day names, starting with Saturday.
-  final List<String> weekNameList = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  final List<String> weekNameList = [
+    'Sat',
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+  ];
 
   late int _startOffset;
   late int _totalDays;
@@ -48,14 +56,17 @@ class CalenderTableProvider extends ChangeNotifier {
   /// [customList] is an optional list of [SelectedDaysModel] to mark special days.
   /// [isRange] enables range selection mode if true.
   void initializeMonth(
-      DateTime selectedMonth,
-      List<SelectedDaysModel>? customList,
-      [bool isRange = false]
-      ) {
+    DateTime selectedMonth,
+    List<SelectedDaysModel>? customList, [
+    bool isRange = false,
+  ]) {
     _selectedMonth = selectedMonth;
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     _startOffset = (firstDay.weekday % 7);
-    _totalDays = DateUtils.getDaysInMonth(_selectedMonth.year, _selectedMonth.month);
+    _totalDays = DateUtils.getDaysInMonth(
+      _selectedMonth.year,
+      _selectedMonth.month,
+    );
     isRangeSelection = isRange;
 
     if (customList != null) {

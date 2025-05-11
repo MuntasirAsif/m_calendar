@@ -22,10 +22,13 @@ class MyApp extends StatelessWidget {
             ),
             selectedDaysList: [
               SelectedDaysModel(
-                selectedDateList: [7,12, 14, 16],
+                selectedDateList: [7, 12, 14, 16],
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange.shade300, Colors.deepOrange.shade400],
+                    colors: [
+                      Colors.orange.shade300,
+                      Colors.deepOrange.shade400,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -35,7 +38,7 @@ class MyApp extends StatelessWidget {
                       color: Colors.orange.shade100,
                       blurRadius: 6,
                       offset: const Offset(2, 2),
-                    )
+                    ),
                   ],
                 ),
               ),
@@ -49,7 +52,7 @@ class MyApp extends StatelessWidget {
                       color: Colors.purple.shade100,
                       blurRadius: 6,
                       offset: const Offset(2, 2),
-                    )
+                    ),
                   ],
                 ),
                 child: const Icon(Icons.star, color: Colors.white, size: 20),
