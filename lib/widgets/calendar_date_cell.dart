@@ -3,12 +3,16 @@ import 'package:m_calendar/provider/calender_table_provider.dart';
 import 'package:provider/provider.dart';
 import '../model/selected_date_model.dart';
 
+/// A widget that represents a single date cell in the calendar grid.
+///
+/// This widget handles its own selection logic based on the [CalenderTableProvider]
+/// and applies custom decorations or children if provided.
 class CalendarDateCell extends StatelessWidget {
-  final int i;
-  final BoxDecoration? defaultDecoration;
-  final Widget? defaultChild;
-  final Widget? userSelectedItemStyle;
 
+  /// Creates a [CalendarDateCell] widget.
+  ///
+  /// This widget displays a styled date cell that reacts to user interaction
+  /// and updates its appearance based on selection status.
   const CalendarDateCell({
     super.key,
     required this.i,
@@ -16,6 +20,17 @@ class CalendarDateCell extends StatelessWidget {
     this.defaultChild,
     this.userSelectedItemStyle,
   });
+  /// The index or identifier for this date cell (usually the day number).
+  final int i;
+
+  /// The default decoration to apply when no specific decoration is selected.
+  final BoxDecoration? defaultDecoration;
+
+  /// The default child widget to display in the cell when no specific child is set.
+  final Widget? defaultChild;
+
+  /// A custom widget to display when the cell is selected by the user.
+  final Widget? userSelectedItemStyle;
 
   @override
   Widget build(BuildContext context) {
@@ -55,4 +70,3 @@ class CalendarDateCell extends StatelessWidget {
     );
   }
 }
-

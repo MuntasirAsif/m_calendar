@@ -5,25 +5,14 @@ import 'package:provider/provider.dart';
 
 import 'model/selected_date_model.dart';
 
+/// A customizable Flutter calendar widget that displays days of a selected month
+/// and supports both single and range-based date selection.
+///
+/// The calendar provides flexibility through decoration, styling, and custom
+/// day cell content. It uses a [ChangeNotifierProvider] to manage calendar state.
 class MCalendar extends StatelessWidget {
-  /// Specifies the initially selected month displayed in the calendar.
-  final DateTime? selectedMonth;
 
-  /// Defines the default decoration applied to the calendar widget.
-  final BoxDecoration? decoration;
-
-  /// Contains the list of days that are marked as selected in the calendar.
-  final List<SelectedDaysModel>? selectedDaysList;
-
-  /// Applies styling to the weekday header names (e.g., Mon, Tue).
-  final TextStyle? weekNameHeaderStyle;
-
-  /// The default widget displayed when no specific selection or state is applied.
-  final Widget? defaultChild;
-
-  /// Determines whether the calendar uses range-based date selection.
-  final bool? isRangeSelection;
-
+  /// Creates an [MCalendar] widget with optional styling and configuration.
   const MCalendar({
     super.key,
     this.selectedMonth,
@@ -33,6 +22,23 @@ class MCalendar extends StatelessWidget {
     this.defaultChild,
     this.isRangeSelection,
   });
+  /// Specifies the initially selected month displayed in the calendar.
+  final DateTime? selectedMonth;
+
+  /// Defines the default decoration applied to each calendar day cell.
+  final BoxDecoration? decoration;
+
+  /// Contains the list of days that are marked as selected in the calendar.
+  final List<SelectedDaysModel>? selectedDaysList;
+
+  /// Applies styling to the weekday header names (e.g., Mon, Tue).
+  final TextStyle? weekNameHeaderStyle;
+
+  /// The default widget displayed in a date cell when no specific selection or state is applied.
+  final Widget? defaultChild;
+
+  /// Determines whether the calendar uses range-based date selection.
+  final bool? isRangeSelection;
 
   @override
   Widget build(BuildContext context) {
@@ -49,7 +55,7 @@ class MCalendar extends StatelessWidget {
           builder: (_, provider, __) {
             return Column(
               children: [
-                // Render week name headers
+                /// Render weekday headers (e.g., Sat, Sun, Mon, ...)
                 Table(
                   children: [
                     TableRow(
@@ -65,7 +71,8 @@ class MCalendar extends StatelessWidget {
                         );
                       }).toList(),
                     ),
-                    // Render calendar days
+
+                    /// Render calendar day cells in weekly rows
                     ...generateCalendarRows(
                       provider: provider,
                       decoration: decoration,
@@ -81,7 +88,12 @@ class MCalendar extends StatelessWidget {
     );
   }
 
-  /// Generates table rows with calendar day cells
+  /// Generates a list of [TableRow]s to display calendar days, organized by week.
+  ///
+  /// Adds leading empty cells for the first week's offset and fills trailing cells
+  /// to ensure each row has exactly 7 columns.
+  ///
+  /// Returns a list of [TableRow] widgets to be rendered in a [Table].
   List<TableRow> generateCalendarRows({
     Widget? defaultChild,
     BoxDecoration? decoration,
@@ -119,4 +131,3 @@ class MCalendar extends StatelessWidget {
     return rows;
   }
 }
-
