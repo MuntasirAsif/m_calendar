@@ -42,33 +42,40 @@ class CalendarDateCell extends StatelessWidget {
 
     // Find if this day is in the custom selected list
     final selectedModel = provider.selectedDaysList.firstWhere(
-          (model) => model.selectedDateList.contains(i),
-      orElse: () => MarkedDaysModel(
-        selectedDateList: [],
-        decoration: defaultDecoration ??
-            BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-      ),
+      (model) => model.selectedDateList.contains(i),
+      orElse:
+          () => MarkedDaysModel(
+            selectedDateList: [],
+            decoration:
+                defaultDecoration ??
+                BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+          ),
     );
 
-    final bool isSelected = provider.isRangeSelection
-        ? provider.isInRange(i)
-        : provider.userPicked == i;
+    final bool isSelected =
+        provider.isRangeSelection
+            ? provider.isInRange(i)
+            : provider.userPicked == i;
 
     // Choose decoration based on user-picked state
-    final BoxDecoration finalDecoration = isSelected
-        ? userPickedDecoration ??
-        selectedModel.decoration.copyWith(
-          color: Colors.teal.shade400,
-        )
-        : selectedModel.decoration;
+    final BoxDecoration finalDecoration =
+        isSelected
+            ? userPickedDecoration ??
+                selectedModel.decoration.copyWith(color: Colors.teal.shade400)
+            : selectedModel.decoration;
 
     // Choose child widget
     final Widget finalChild =
-    isSelected ? userSelectedItemStyle ?? defaultChild ?? Center(child: Text(i.toString()))
-        : selectedModel.child ?? defaultChild ?? Center(child: Text(i.toString()));
+        isSelected
+            ? userSelectedItemStyle ??
+                defaultChild ??
+                Center(child: Text(i.toString()))
+            : selectedModel.child ??
+                defaultChild ??
+                Center(child: Text(i.toString()));
 
     return GestureDetector(
       onTap: () => provider.toggleUserPicked(i),
