@@ -24,4 +24,4 @@ Add the package in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^1.0.0
+  m_calendar: ^1.0.1
