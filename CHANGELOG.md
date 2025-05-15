@@ -1,8 +1,10 @@
-## [1.0.5] 
+## [1.0.0]
 
-- Add User Picked date customizable decoration
+- First stable release.
+- Added user-picked date customizable decoration.
+- Improved documentation and structure.
 
-- ## [0.0.4] 
+## [0.0.4] 
 
 - Update public documentation
 
