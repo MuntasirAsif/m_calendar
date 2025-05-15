@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import '../model/selected_date_model.dart';
+import '../model/marked_date_model.dart';
 
 /// A provider class that manages the state of a calendar table, including
 /// selected dates, current month, and selection mode (single or range).
@@ -22,7 +22,7 @@ class CalenderTableProvider extends ChangeNotifier {
   bool isRangeSelection = false;
 
   /// List of custom selected day models with decorations or children.
-  List<SelectedDaysModel> selectedDaysList = [];
+  List<MarkedDaysModel> selectedDaysList = [];
 
   /// The offset index of the first day in the month (0-6 based on weekday).
   int get startOffset => _startOffset;
@@ -45,11 +45,11 @@ class CalenderTableProvider extends ChangeNotifier {
   /// Initializes the calendar with a given month and an optional custom date list.
   ///
   /// [selectedMonth] defines the month to display.
-  /// [customList] is an optional list of [SelectedDaysModel] to mark special days.
+  /// [customList] is an optional list of [MarkedDaysModel] to mark special days.
   /// [isRange] enables range selection mode if true.
   void initializeMonth(
       DateTime selectedMonth,
-      List<SelectedDaysModel>? customList,
+      List<MarkedDaysModel>? customList,
       [bool isRange = false]
       ) {
     _selectedMonth = selectedMonth;

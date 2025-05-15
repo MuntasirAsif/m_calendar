@@ -3,7 +3,7 @@ import 'package:m_calendar/provider/calender_table_provider.dart';
 import 'package:m_calendar/widgets/calendar_date_cell.dart';
 import 'package:provider/provider.dart';
 
-import 'model/selected_date_model.dart';
+import 'model/marked_date_model.dart';
 
 /// A customizable Flutter calendar widget that displays days of a selected month
 /// and supports both single and range-based date selection.
@@ -11,17 +11,18 @@ import 'model/selected_date_model.dart';
 /// The calendar provides flexibility through decoration, styling, and custom
 /// day cell content. It uses a [ChangeNotifierProvider] to manage calendar state.
 class MCalendar extends StatelessWidget {
-
   /// Creates an [MCalendar] widget with optional styling and configuration.
   const MCalendar({
     super.key,
     this.selectedMonth,
     this.decoration,
-    this.selectedDaysList,
+    this.markedDaysList,
     this.weekNameHeaderStyle,
     this.defaultChild,
     this.isRangeSelection,
+    this.userPickedDecoration,
   });
+
   /// Specifies the initially selected month displayed in the calendar.
   final DateTime? selectedMonth;
 
@@ -29,7 +30,7 @@ class MCalendar extends StatelessWidget {
   final BoxDecoration? decoration;
 
   /// Contains the list of days that are marked as selected in the calendar.
-  final List<SelectedDaysModel>? selectedDaysList;
+  final List<MarkedDaysModel>? markedDaysList;
 
   /// Applies styling to the weekday header names (e.g., Mon, Tue).
   final TextStyle? weekNameHeaderStyle;
@@ -40,15 +41,19 @@ class MCalendar extends StatelessWidget {
   /// Determines whether the calendar uses range-based date selection.
   final bool? isRangeSelection;
 
+  /// The box decoration for userPicked date design
+  final BoxDecoration? userPickedDecoration;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
-      create: (_) => CalenderTableProvider()
-        ..initializeMonth(
-          selectedMonth ?? DateTime.now(),
-          selectedDaysList,
-          isRangeSelection ?? false,
-        ),
+      create:
+          (_) =>
+              CalenderTableProvider()..initializeMonth(
+                selectedMonth ?? DateTime.now(),
+                markedDaysList,
+                isRangeSelection ?? false,
+              ),
       child: Scaffold(
         appBar: AppBar(title: const Text('MCalendar')),
         body: Consumer<CalenderTableProvider>(
@@ -59,17 +64,19 @@ class MCalendar extends StatelessWidget {
                 Table(
                   children: [
                     TableRow(
-                      children: provider.weekNameList.map((name) {
-                        return Center(
-                          child: Text(
-                            name,
-                            style: weekNameHeaderStyle ??
-                                const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                ),
-                          ),
-                        );
-                      }).toList(),
+                      children:
+                          provider.weekNameList.map((name) {
+                            return Center(
+                              child: Text(
+                                name,
+                                style:
+                                    weekNameHeaderStyle ??
+                                    const TextStyle(
+                                      fontWeight: FontWeight.bold,
+                                    ),
+                              ),
+                            );
+                          }).toList(),
                     ),
 
                     /// Render calendar day cells in weekly rows
@@ -77,6 +84,7 @@ class MCalendar extends StatelessWidget {
                       provider: provider,
                       decoration: decoration,
                       defaultChild: defaultChild,
+                      userPickedDecoration: userPickedDecoration,
                     ),
                   ],
                 ),
@@ -97,6 +105,7 @@ class MCalendar extends StatelessWidget {
   List<TableRow> generateCalendarRows({
     Widget? defaultChild,
     BoxDecoration? decoration,
+    BoxDecoration? userPickedDecoration,
     required CalenderTableProvider provider,
   }) {
     List<Widget> dayCells = [];
@@ -113,6 +122,7 @@ class MCalendar extends StatelessWidget {
           i: i,
           defaultDecoration: decoration,
           defaultChild: defaultChild,
+          userPickedDecoration: userPickedDecoration,
         ),
       );
     }

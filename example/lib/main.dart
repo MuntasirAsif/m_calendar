@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:m_calendar/m_calendar.dart';
-import 'package:m_calendar/model/selected_date_model.dart';
+import 'package:m_calendar/model/marked_date_model.dart';
 
 void main() {
   runApp(const MyApp());
@@ -15,17 +15,23 @@ class MyApp extends StatelessWidget {
       home: SafeArea(
         child: Center(
           child: MCalendar(
+            isRangeSelection: true,
             selectedMonth: DateTime(2025, 4),
             decoration: BoxDecoration(
               color: Colors.grey.shade200,
               borderRadius: BorderRadius.circular(6),
             ),
-            selectedDaysList: [
-              SelectedDaysModel(
-                selectedDateList: [7,12, 14, 16],
+            userPickedDecoration: const BoxDecoration(color: Colors.lightBlue),
+            weekNameHeaderStyle: const TextStyle(fontSize: 20, color: Colors.black54),
+            markedDaysList: [
+              MarkedDaysModel(
+                selectedDateList: [7, 12, 14, 16],
                 decoration: BoxDecoration(
                   gradient: LinearGradient(
-                    colors: [Colors.orange.shade300, Colors.deepOrange.shade400],
+                    colors: [
+                      Colors.orange.shade300,
+                      Colors.deepOrange.shade400,
+                    ],
                     begin: Alignment.topLeft,
                     end: Alignment.bottomRight,
                   ),
@@ -35,11 +41,11 @@ class MyApp extends StatelessWidget {
                       color: Colors.orange.shade100,
                       blurRadius: 6,
                       offset: const Offset(2, 2),
-                    )
+                    ),
                   ],
                 ),
               ),
-              SelectedDaysModel(
+              MarkedDaysModel(
                 selectedDateList: [5],
                 decoration: BoxDecoration(
                   color: Colors.purple.shade600,
@@ -49,7 +55,7 @@ class MyApp extends StatelessWidget {
                       color: Colors.purple.shade100,
                       blurRadius: 6,
                       offset: const Offset(2, 2),
-                    )
+                    ),
                   ],
                 ),
                 child: const Icon(Icons.star, color: Colors.white, size: 20),
