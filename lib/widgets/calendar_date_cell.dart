@@ -1,14 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:m_calendar/provider/calender_table_provider.dart';
 import 'package:provider/provider.dart';
-import '../model/selected_date_model.dart';
+import '../model/marked_date_model.dart';
 
 /// A widget that represents a single date cell in the calendar grid.
 ///
 /// This widget handles its own selection logic based on the [CalenderTableProvider]
 /// and applies custom decorations or children if provided.
 class CalendarDateCell extends StatelessWidget {
-
   /// Creates a [CalendarDateCell] widget.
   ///
   /// This widget displays a styled date cell that reacts to user interaction
@@ -19,7 +18,9 @@ class CalendarDateCell extends StatelessWidget {
     this.defaultDecoration,
     this.defaultChild,
     this.userSelectedItemStyle,
+    this.userPickedDecoration,
   });
+
   /// The index or identifier for this date cell (usually the day number).
   final int i;
 
@@ -32,6 +33,9 @@ class CalendarDateCell extends StatelessWidget {
   /// A custom widget to display when the cell is selected by the user.
   final Widget? userSelectedItemStyle;
 
+  /// A custom decoration to apply when the user selects this cell.
+  final BoxDecoration? userPickedDecoration;
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CalenderTableProvider>(context);
@@ -39,7 +43,7 @@ class CalendarDateCell extends StatelessWidget {
     // Find if this day is in the custom selected list
     final selectedModel = provider.selectedDaysList.firstWhere(
           (model) => model.selectedDateList.contains(i),
-      orElse: () => SelectedDaysModel(
+      orElse: () => MarkedDaysModel(
         selectedDateList: [],
         decoration: defaultDecoration ??
             BoxDecoration(
@@ -49,23 +53,30 @@ class CalendarDateCell extends StatelessWidget {
       ),
     );
 
-    final selectedDecoration = selectedModel.decoration;
-    final child = selectedModel.child;
-
-    // Determine if this day is selected
     final bool isSelected = provider.isRangeSelection
         ? provider.isInRange(i)
         : provider.userPicked == i;
+
+    // Choose decoration based on user-picked state
+    final BoxDecoration finalDecoration = isSelected
+        ? userPickedDecoration ??
+        selectedModel.decoration.copyWith(
+          color: Colors.teal.shade400,
+        )
+        : selectedModel.decoration;
+
+    // Choose child widget
+    final Widget finalChild =
+    isSelected ? userSelectedItemStyle ?? defaultChild ?? Center(child: Text(i.toString()))
+        : selectedModel.child ?? defaultChild ?? Center(child: Text(i.toString()));
 
     return GestureDetector(
       onTap: () => provider.toggleUserPicked(i),
       child: Container(
         padding: const EdgeInsets.all(12),
         margin: const EdgeInsets.all(4),
-        decoration: selectedDecoration.copyWith(
-          color: isSelected ? Colors.teal.shade400 : selectedDecoration.color,
-        ),
-        child: child ?? defaultChild ?? Center(child: Text(i.toString())),
+        decoration: finalDecoration,
+        child: finalChild,
       ),
     );
   }
