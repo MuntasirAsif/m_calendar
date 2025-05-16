@@ -21,6 +21,7 @@ class MCalendar extends StatelessWidget {
     this.defaultChild,
     this.isRangeSelection,
     this.userPickedDecoration,
+    this.userPickedChild,
   });
 
   /// Specifies the initially selected month displayed in the calendar.
@@ -44,6 +45,9 @@ class MCalendar extends StatelessWidget {
   /// The box decoration for userPicked date design
   final BoxDecoration? userPickedDecoration;
 
+  /// A custom widget to display when the user selects this cell.
+  final Widget? userPickedChild;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -54,44 +58,47 @@ class MCalendar extends StatelessWidget {
                 markedDaysList,
                 isRangeSelection ?? false,
               ),
-      child: Scaffold(
-        appBar: AppBar(title: const Text('MCalendar')),
-        body: Consumer<CalenderTableProvider>(
-          builder: (_, provider, __) {
-            return Column(
-              children: [
-                /// Render weekday headers (e.g., Sat, Sun, Mon, ...)
-                Table(
-                  children: [
-                    TableRow(
-                      children:
-                          provider.weekNameList.map((name) {
-                            return Center(
-                              child: Text(
-                                name,
-                                style:
-                                    weekNameHeaderStyle ??
-                                    const TextStyle(
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                              ),
-                            );
-                          }).toList(),
-                    ),
+      child: StreamBuilder<Object>(
+        stream: null,
+        builder: (context, snapshot) {
+          return Consumer<CalenderTableProvider>(
+            builder: (_, provider, __) {
+              return Column(
+                children: [
+                  /// Render weekday headers (e.g., Sat, Sun, Mon, ...)
+                  Table(
+                    children: [
+                      TableRow(
+                        children:
+                            provider.weekNameList.map((name) {
+                              return Center(
+                                child: Text(
+                                  name,
+                                  style:
+                                      weekNameHeaderStyle ??
+                                      const TextStyle(
+                                        fontWeight: FontWeight.bold,
+                                      ),
+                                ),
+                              );
+                            }).toList(),
+                      ),
 
-                    /// Render calendar day cells in weekly rows
-                    ...generateCalendarRows(
-                      provider: provider,
-                      decoration: decoration,
-                      defaultChild: defaultChild,
-                      userPickedDecoration: userPickedDecoration,
-                    ),
-                  ],
-                ),
-              ],
-            );
-          },
-        ),
+                      /// Render calendar day cells in weekly rows
+                      ...generateCalendarRows(
+                        provider: provider,
+                        decoration: decoration,
+                        defaultChild: defaultChild,
+                        userPickedDecoration: userPickedDecoration,
+                        userPickedChild: userPickedChild
+                      ),
+                    ],
+                  ),
+                ],
+              );
+            },
+          );
+        },
       ),
     );
   }
@@ -104,6 +111,7 @@ class MCalendar extends StatelessWidget {
   /// Returns a list of [TableRow] widgets to be rendered in a [Table].
   List<TableRow> generateCalendarRows({
     Widget? defaultChild,
+    Widget? userPickedChild,
     BoxDecoration? decoration,
     BoxDecoration? userPickedDecoration,
     required CalenderTableProvider provider,
@@ -123,6 +131,7 @@ class MCalendar extends StatelessWidget {
           defaultDecoration: decoration,
           defaultChild: defaultChild,
           userPickedDecoration: userPickedDecoration,
+          userPickedChild: userPickedChild,
         ),
       );
     }
