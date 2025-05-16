@@ -9,7 +9,7 @@ A customizable and lightweight Flutter calendar widget package for list-based da
 <p float="left">
   <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png" width="300" alt="">
   <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_1.png" width="300" alt="">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png" width="300" alt="">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png" width="300">
 </p>
 
 ---
