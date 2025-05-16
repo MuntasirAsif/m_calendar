@@ -6,11 +6,15 @@ A customizable and lightweight Flutter calendar widget package for list-based da
 
 ## 🖼️ Previews
 
-<p float="left">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png" width="300" alt="MCalendar Preview">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_1.png" width="300" alt="MCalendar Preview - Range">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png" width="300" alt="MCalendar Preview - Single Pick">
-</p>
+### Default Calendar
+![Default](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png)
+
+### Range Selection & Icons
+![Range](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_1.png)
+
+### Single Selection & Icons
+![Single](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png)
+
 
 
 ---
