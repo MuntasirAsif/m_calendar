@@ -1,32 +1,36 @@
-# m_calendar
+# 📆 m_calendar
 
 A customizable and lightweight Flutter calendar widget package for list-based day selections with user-defined decorations.
 
 ---
 
-![MCalendar Preview](https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png)
+## 🖼️ Previews
+
+<p float="left">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png" width="300" alt="">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_1.png" width="300" alt="">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png" width="300" alt="">
+</p>
+
 
 ## ✨ Features
 
-- 📅 Display any month in a responsive calendar layout
-- ✅ Highlight specific days using a simple day list
-- 🎨 Style day cells with custom `BoxDecoration` and child `Widget`
-- 🖌️ Add customizable decoration for user-picked dates
-- 📆 Support for both single and range date selection
-- 💼 Built with `provider` for state management
-- 🧩 Easily embeddable in any Flutter UI
+- 📅 **Month View** – Display any month in a responsive calendar layout
+- ✅ **Marked Days** – Highlight days using a simple list
+- 🎨 **Custom Decorations** – Style each cell using `BoxDecoration`
+- 🔥 **User Selection** – Customize picked day styles and icons
+- 📆 **Selection Modes** – Supports both single and range selections
+- 💼 **State Management** – Powered by [`provider`](https://pub.dev/packages/provider)
+- 🧩 **Easy Integration** – Embeddable in any UI and layout
 
 ---
 
 ## 🚀 Getting Started
 
-Add the package in your `pubspec.yaml`:
+### 1️⃣ Add Dependency
+
+Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^1.0.0
-  
----
-
-Then import it in your Dart file:
-    import 'package:m_calendar/m_calendar.dart';
+  m_calendar: ^1.0.2

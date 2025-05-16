@@ -1,16 +1,30 @@
+## [1.0.2]
+
+- Beautified calendar example in `README.md`
+- Added full Dart documentation for all public classes and functions
+- Modularized `CalendarDateCell` and `getRangeDecoration` logic
+- Improved `MCalendar` UI with card layout, theme consistency, and styling polish
+- Fixed logical prioritization in decoration application for user-picked and range cells
+
+## [1.0.1]
+
+- Optimized `CalendarDateCell` behavior
+- Added support for custom child widgets for user-picked cells
+- Enhanced default decoration fallback handling
+
 ## [1.0.0]
 
 - First stable release.
 - Added user-picked date customizable decoration.
 - Improved documentation and structure.
 
-## [0.0.4] 
+## [0.0.4]
 
 - Update public documentation
 
 ## [0.0.3]
 
-- Add user selection option-(both single date & range date selection)
+- Add user selection option (both single date & range date selection)
 - Improved documentation coverage to meet pub.dev analysis requirements.
 - Renamed `selectedDateModel.dart` to `selected_date_model.dart` for Dart style compliance.
 - Cleaned up formatting and resolved all lint issues.

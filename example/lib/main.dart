@@ -12,55 +12,67 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: SafeArea(
-        child: Center(
-          child: MCalendar(
-            isRangeSelection: true,
-            selectedMonth: DateTime(2025, 4),
-            decoration: BoxDecoration(
-              color: Colors.grey.shade200,
-              borderRadius: BorderRadius.circular(6),
+      theme: ThemeData.light(useMaterial3: true),
+      home: Scaffold(
+        backgroundColor: const Color(0xFFF8F9FA),
+        appBar: AppBar(
+          title: const Text("Custom MCalendar"),
+          centerTitle: true,
+          backgroundColor: Colors.white,
+          elevation: 1,
+        ),
+        body: Center(
+          child: Card(
+            elevation: 8,
+            margin: const EdgeInsets.all(16),
+            shape: RoundedRectangleBorder(
+              borderRadius: BorderRadius.circular(24),
             ),
-            userPickedDecoration: const BoxDecoration(color: Colors.lightBlue),
-            weekNameHeaderStyle: const TextStyle(fontSize: 20, color: Colors.black54),
-            markedDaysList: [
-              MarkedDaysModel(
-                selectedDateList: [7, 12, 14, 16],
+            child: Padding(
+              padding: const EdgeInsets.all(16.0),
+              child: MCalendar(
+                isRangeSelection: true,
+                selectedMonth: DateTime(2025, 4),
                 decoration: BoxDecoration(
-                  gradient: LinearGradient(
-                    colors: [
-                      Colors.orange.shade300,
-                      Colors.deepOrange.shade400,
-                    ],
-                    begin: Alignment.topLeft,
-                    end: Alignment.bottomRight,
+                  color: const Color(0xffEDEFF1),
+                  borderRadius: BorderRadius.circular(32),
+                ),
+                userPickedDecoration: BoxDecoration(
+                  color: const Color(0xffFFCE51),
+                  shape: BoxShape.circle,
+                  border: Border.all(color: Colors.deepOrange, width: 2),
+                ),
+                weekNameHeaderStyle: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: Colors.black87,
+                ),
+                userPickedChild: Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    color: Colors.yellow,
+                    shape: BoxShape.circle,
                   ),
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.orange.shade100,
-                      blurRadius: 6,
-                      offset: const Offset(2, 2),
-                    ),
-                  ],
+                  child: const Icon(
+                    Icons.local_fire_department,
+                    color: Colors.redAccent,
+                    size: 18,
+                  ),
                 ),
-              ),
-              MarkedDaysModel(
-                selectedDateList: [5],
-                decoration: BoxDecoration(
-                  color: Colors.purple.shade600,
-                  borderRadius: BorderRadius.circular(10),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.purple.shade100,
-                      blurRadius: 6,
-                      offset: const Offset(2, 2),
+                markedDaysList: [
+                  MarkedDaysModel(
+                    selectedDateList: [7, 12, 14, 16],
+                    child: const Center(
+                      child: Icon(Icons.star, size: 16, color: Colors.white),
                     ),
-                  ],
-                ),
-                child: const Icon(Icons.star, color: Colors.white, size: 20),
+                    decoration: BoxDecoration(
+                      color: Colors.redAccent.withOpacity(0.8),
+                      shape: BoxShape.circle,
+                    ),
+                  ),
+                ],
               ),
-            ],
+            ),
           ),
         ),
       ),
