@@ -24,9 +24,4 @@ Add the package in your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^1.0.0
-  
----
-
-Then import it in your Dart file:
-    import 'package:m_calendar/m_calendar.dart';
+  m_calendar: ^1.0.1
