@@ -1,6 +1,6 @@
 ## [1.1.1]
 
-- Fix Example
+- Fix Example & example in `README.md`
 
 ## [1.1.0]
 
