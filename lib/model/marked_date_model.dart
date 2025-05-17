@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 /// The [MarkedDaysModel] is used to define which days should be visually
 /// decorated on a calendar, along with optional custom widgets.
 class MarkedDaysModel {
-  /// Creates a [MarkedDaysModel] with a list of selected days,
+  /// Creates a [MarkedDaysModel] with a list of selected dates,
   /// a decoration to apply, and an optional child widget.
   ///
-  /// - [selectedDateList] should contain the day numbers (1–31) you want to mark.
+  /// - [selectedDateList] should contain full [DateTime] values.
   /// - [decoration] is the visual styling applied to those marked days.
   /// - [child] is an optional widget to overlay on those decorated days.
   MarkedDaysModel({
@@ -17,17 +17,13 @@ class MarkedDaysModel {
     this.child,
   });
 
-  /// A list of integers representing the day numbers (1 to 31)
+  /// A list of [DateTime] objects representing the exact days
   /// that should be marked on the calendar.
-  final List<int> selectedDateList;
+  final List<DateTime> selectedDateList;
 
   /// The visual decoration to apply to the marked days.
-  ///
-  /// This can include background color, border, shape, etc.
   final BoxDecoration decoration;
 
   /// An optional widget to display on top of the decorated day cell.
-  ///
-  /// This could be a label, icon, or any custom indicator.
   final Widget? child;
 }

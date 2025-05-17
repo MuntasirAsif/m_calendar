@@ -1,22 +1,13 @@
 import 'package:flutter/material.dart';
 import '../model/marked_date_model.dart';
 
-/// A provider class that manages the state of a calendar table, including
-/// selected dates, current month, and selection mode (single or range).
+/// A [ChangeNotifier] that manages calendar state, including selected month,
+/// selected dates, and range selection.
 ///
-/// This provider supports notifying listeners when changes occur to update
-/// UI components accordingly.
+/// Used to control and update a custom calendar widget.
 class CalenderTableProvider extends ChangeNotifier {
-  /// List of week day names, starting with Saturday.
-  final List<String> weekNameList = [
-    'Sat',
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-  ];
+  /// A fixed list of week day labels starting from Saturday.
+  final List<String> weekNameList = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
 
   late int _startOffset;
   late int _totalDays;
@@ -26,40 +17,41 @@ class CalenderTableProvider extends ChangeNotifier {
   int? _rangeStart;
   int? _rangeEnd;
 
-  /// Determines whether range selection is enabled.
+  /// Whether range selection is enabled.
   bool isRangeSelection = false;
 
-  /// List of custom selected day models with decorations or children.
+  /// A list of dates marked with custom decoration and optional child widgets.
   List<MarkedDaysModel> selectedDaysList = [];
 
-  /// The offset index of the first day in the month (0-6 based on weekday).
+  /// Optional callback invoked when the user picks a date or range.
+  void Function(List<DateTime>)? _onUserPickedCallback;
+
+  /// Number of blank leading cells before the first day of the month.
   int get startOffset => _startOffset;
 
-  /// The total number of days in the selected month.
+  /// Total number of days in the currently selected month.
   int get totalDays => _totalDays;
 
-  /// The currently selected month.
+  /// The selected month displayed in the calendar.
   DateTime get selectedMonth => _selectedMonth;
 
-  /// The single date selected by the user (when range selection is off).
+  /// The currently selected day for single-date mode (1-based).
   int? get userPicked => _userPicked;
 
-  /// The starting index of the selected date range.
+  /// Start index of the user-selected range (1-based).
   int? get rangeStart => _rangeStart;
 
-  /// The ending index of the selected date range.
+  /// End index of the user-selected range (1-based).
   int? get rangeEnd => _rangeEnd;
 
-  /// Initializes the calendar with a given month and an optional custom date list.
-  ///
-  /// [selectedMonth] defines the month to display.
-  /// [customList] is an optional list of [MarkedDaysModel] to mark special days.
-  /// [isRange] enables range selection mode if true.
+  /// Initializes the calendar with a specific [selectedMonth], optional marked days [customList],
+  /// and a selection mode flag [isRange]. Also registers an optional [onUserPicked] callback.
   void initializeMonth(
-    DateTime selectedMonth,
-    List<MarkedDaysModel>? customList, [
-    bool isRange = false,
-  ]) {
+      DateTime selectedMonth,
+      List<MarkedDaysModel>? customList,
+      bool isRange, {
+        void Function(List<DateTime>)? onUserPicked,
+      }) {
     _selectedMonth = selectedMonth;
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     _startOffset = (firstDay.weekday % 7);
@@ -68,6 +60,7 @@ class CalenderTableProvider extends ChangeNotifier {
       _selectedMonth.month,
     );
     isRangeSelection = isRange;
+    _onUserPickedCallback = onUserPicked;
 
     if (customList != null) {
       selectedDaysList = customList;
@@ -79,9 +72,10 @@ class CalenderTableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Handles user interaction for selecting a date or a range of dates.
+  /// Toggles the selection state when a user taps a calendar day cell.
   ///
-  /// [index] is the calendar cell index corresponding to the selected day.
+  /// If [isRangeSelection] is enabled, the tap builds a range; otherwise,
+  /// a single date is picked and the [_onUserPickedCallback] is fired.
   void toggleUserPicked(int index) {
     if (isRangeSelection) {
       if (_rangeStart == null || (_rangeStart != null && _rangeEnd != null)) {
@@ -89,20 +83,25 @@ class CalenderTableProvider extends ChangeNotifier {
         _rangeEnd = null;
       } else if (_rangeStart != null && _rangeEnd == null) {
         _rangeEnd = index;
-
         if (_rangeEnd! < _rangeStart!) {
           final temp = _rangeStart;
           _rangeStart = _rangeEnd;
           _rangeEnd = temp;
         }
       }
+
+      if (_rangeStart != null && _rangeEnd != null) {
+        _onUserPickedCallback?.call(_getSelectedRangeDates());
+      }
     } else {
       _userPicked = index;
+      _onUserPickedCallback?.call([_getDateFromIndex(index)]);
     }
+
     notifyListeners();
   }
 
-  /// Returns true if the given [index] is within the selected date range.
+  /// Returns true if the given day [index] is within the user-selected range.
   bool isInRange(int index) {
     if (_rangeStart != null && _rangeEnd != null) {
       return index >= _rangeStart! && index <= _rangeEnd!;
@@ -110,15 +109,30 @@ class CalenderTableProvider extends ChangeNotifier {
     return false;
   }
 
-  /// Toggles the calendar between single and range selection modes.
+  /// Switches the calendar between range and single selection mode.
   ///
-  /// [selectionMode] is the new mode to switch to.
+  /// Resets any current selections.
   void toggleSelectionMode(bool selectionMode) {
     isRangeSelection = selectionMode;
-    isRangeSelection = !isRangeSelection;
     _userPicked = null;
     _rangeStart = null;
     _rangeEnd = null;
     notifyListeners();
+  }
+
+  /// Converts a calendar cell [index] (1-based day of month) into a full [DateTime].
+  DateTime _getDateFromIndex(int index) {
+    return DateTime(_selectedMonth.year, _selectedMonth.month, index);
+  }
+
+  /// Generates a list of [DateTime]s within the user-selected range.
+  ///
+  /// Returns an empty list if the range is invalid.
+  List<DateTime> _getSelectedRangeDates() {
+    if (_rangeStart == null || _rangeEnd == null) return [];
+    return List.generate(
+      _rangeEnd! - _rangeStart! + 1,
+          (i) => _getDateFromIndex(_rangeStart! + i),
+    );
   }
 }

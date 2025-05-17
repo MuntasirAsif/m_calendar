@@ -1,3 +1,11 @@
+## [1.1.0]
+
+- User can get the pick date data as a list of DateTime, not just a single DateTime.
+- Modularized `CalendarDateCell` and `getRangeDecoration` logic
+- Fixed logical prioritization in decoration application for user-picked and range cells
+- Improved `MCalendar` UI with card layout, theme consistency, and styling polish
+- Added full Dart documentation for all public classes and functions
+
 ## [1.0.2]
 
 - Beautified calendar example in `README.md`

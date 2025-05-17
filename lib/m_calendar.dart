@@ -23,6 +23,8 @@ class MCalendar extends StatelessWidget {
     this.isRangeSelection,
     this.userPickedDecoration,
     this.userPickedChild,
+    this.cellPadding,
+    required this.onUserPicked,
   });
 
   /// The month to be displayed in the calendar.
@@ -53,6 +55,12 @@ class MCalendar extends StatelessWidget {
   /// The widget to display in a user-picked cell.
   final Widget? userPickedChild;
 
+  /// Padding applied to the cell content.
+  final EdgeInsets? cellPadding;
+
+  /// the function return the userPickDate value
+  final void Function(List<DateTime>)? onUserPicked;
+
   @override
   Widget build(BuildContext context) {
     return ChangeNotifierProvider(
@@ -62,6 +70,7 @@ class MCalendar extends StatelessWidget {
                 selectedMonth ?? DateTime.now(),
                 markedDaysList,
                 isRangeSelection ?? false,
+                onUserPicked: onUserPicked,
               ),
       child: Consumer<CalenderTableProvider>(
         builder: (_, provider, __) {
@@ -97,6 +106,7 @@ class MCalendar extends StatelessWidget {
                     defaultChild: defaultChild,
                     userPickedDecoration: userPickedDecoration,
                     userPickedChild: userPickedChild,
+                    cellPadding: cellPadding,
                   ),
                 ],
               ),
@@ -115,6 +125,7 @@ class MCalendar extends StatelessWidget {
     Widget? userPickedChild,
     BoxDecoration? decoration,
     BoxDecoration? userPickedDecoration,
+    EdgeInsets? cellPadding,
     required CalenderTableProvider provider,
   }) {
     final List<Widget> dayCells = [];
@@ -133,6 +144,7 @@ class MCalendar extends StatelessWidget {
           defaultChild: defaultChild,
           userPickedDecoration: userPickedDecoration,
           userPickedChild: userPickedChild,
+          cellPadding: cellPadding,
         ),
       );
     }
