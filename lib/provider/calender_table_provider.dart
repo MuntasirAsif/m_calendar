@@ -7,7 +7,15 @@ import '../model/marked_date_model.dart';
 /// Used to control and update a custom calendar widget.
 class CalenderTableProvider extends ChangeNotifier {
   /// A fixed list of week day labels starting from Saturday.
-  final List<String> weekNameList = ['Sat', 'Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri'];
+  final List<String> weekNameList = [
+    'Sat',
+    'Sun',
+    'Mon',
+    'Tue',
+    'Wed',
+    'Thu',
+    'Fri',
+  ];
 
   late int _startOffset;
   late int _totalDays;
@@ -47,11 +55,11 @@ class CalenderTableProvider extends ChangeNotifier {
   /// Initializes the calendar with a specific [selectedMonth], optional marked days [customList],
   /// and a selection mode flag [isRange]. Also registers an optional [onUserPicked] callback.
   void initializeMonth(
-      DateTime selectedMonth,
-      List<MarkedDaysModel>? customList,
-      bool isRange, {
-        void Function(List<DateTime>)? onUserPicked,
-      }) {
+    DateTime selectedMonth,
+    List<MarkedDaysModel>? customList,
+    bool isRange, {
+    void Function(List<DateTime>)? onUserPicked,
+  }) {
     _selectedMonth = selectedMonth;
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month, 1);
     _startOffset = (firstDay.weekday % 7);
@@ -132,7 +140,7 @@ class CalenderTableProvider extends ChangeNotifier {
     if (_rangeStart == null || _rangeEnd == null) return [];
     return List.generate(
       _rangeEnd! - _rangeStart! + 1,
-          (i) => _getDateFromIndex(_rangeStart! + i),
+      (i) => _getDateFromIndex(_rangeStart! + i),
     );
   }
 }

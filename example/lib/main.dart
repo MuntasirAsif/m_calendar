@@ -32,7 +32,7 @@ class MyApp extends StatelessWidget {
               padding: const EdgeInsets.all(16.0),
               child: MCalendar(
                 isRangeSelection: true,
-                selectedMonth: DateTime(2025, 4),
+                selectedMonth: DateTime(2025, 5),
                 decoration: BoxDecoration(
                   color: const Color(0xffEDEFF1),
                   borderRadius: BorderRadius.circular(32),
@@ -61,16 +61,22 @@ class MyApp extends StatelessWidget {
                 ),
                 markedDaysList: [
                   MarkedDaysModel(
-                    selectedDateList: [7, 12, 14, 16],
+                    selectedDateList: [
+                      DateTime(2025, 5, 17),
+                      DateTime(2025, 5, 20),
+                    ],
                     child: const Center(
                       child: Icon(Icons.star, size: 16, color: Colors.white),
                     ),
                     decoration: BoxDecoration(
-                      color: Colors.redAccent.withOpacity(0.8),
+                      color: Colors.redAccent.withAlpha(150),
                       shape: BoxShape.circle,
                     ),
                   ),
                 ],
+                onUserPicked: (value) {
+                  debugPrint(value.toString());
+                },
               ),
             ),
           ),
