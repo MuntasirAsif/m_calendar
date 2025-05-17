@@ -33,4 +33,4 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^1.0.2
+  m_calendar: ^1.1.0

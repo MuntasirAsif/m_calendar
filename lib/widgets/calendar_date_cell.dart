@@ -25,6 +25,7 @@ class CalendarDateCell extends StatelessWidget {
     this.userSelectedItemStyle,
     this.userPickedDecoration,
     this.userPickedChild,
+    this.cellPadding,
   });
 
   /// The day of the month represented by this cell (1-based index).
@@ -45,12 +46,25 @@ class CalendarDateCell extends StatelessWidget {
   /// Custom widget displayed when the cell is picked by the user.
   final Widget? userPickedChild;
 
+  /// Padding applied to the cell content.
+  final EdgeInsets? cellPadding;
+
   @override
   Widget build(BuildContext context) {
     final provider = Provider.of<CalenderTableProvider>(context);
+    final currentDate = DateTime(
+      provider.selectedMonth.year,
+      provider.selectedMonth.month,
+      i,
+    );
 
     final selectedModel = provider.selectedDaysList.firstWhere(
-      (model) => model.selectedDateList.contains(i),
+      (model) => model.selectedDateList.any(
+        (d) =>
+            d.year == currentDate.year &&
+            d.month == currentDate.month &&
+            d.day == currentDate.day,
+      ),
       orElse:
           () => MarkedDaysModel(
             selectedDateList: [],
@@ -66,7 +80,7 @@ class CalendarDateCell extends StatelessWidget {
     final bool isUserPicked = provider.userPicked == i;
     final bool isInRange = provider.isRangeSelection && provider.isInRange(i);
 
-    final BoxDecoration finalDecoration =
+    BoxDecoration finalDecoration =
         isInRange
             ? getRangeDecoration(
               context: context,
@@ -95,11 +109,30 @@ class CalendarDateCell extends StatelessWidget {
         isInRange
             ? const EdgeInsets.symmetric(horizontal: 0, vertical: 4)
             : const EdgeInsets.all(4);
+    final EdgeInsets finalPadding =
+        isInRange && cellPadding != null
+            ? EdgeInsets.zero
+            : cellPadding ?? const EdgeInsets.all(12);
+
+    bool rangePickHold =
+        provider.rangeStart != null &&
+        provider.rangeEnd == null &&
+        provider.rangeStart == i;
+    finalDecoration =
+        rangePickHold
+            ? (userPickedDecoration != null
+                ? userPickedDecoration!.copyWith(
+                  color: userPickedDecoration!.color?.withValues(alpha: 128),
+                )
+                : selectedModel.decoration.copyWith(
+                  color: Colors.teal.shade400.withValues(alpha: 128),
+                ))
+            : finalDecoration;
 
     return GestureDetector(
       onTap: () => provider.toggleUserPicked(i),
       child: Container(
-        padding: const EdgeInsets.all(12),
+        padding: finalPadding,
         margin: finalMargin,
         decoration: finalDecoration,
         child: finalChild,

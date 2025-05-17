@@ -27,16 +27,22 @@ BoxDecoration getRangeDecoration({
   BoxDecoration? defaultDecoration,
   required Color baseColor,
 }) {
+  if (rangeStart == rangeEnd) {
+    return BoxDecoration(
+      color: baseColor.withAlpha(100),
+      borderRadius: BorderRadius.circular(32),
+    );
+  }
   if (i == rangeStart) {
     return BoxDecoration(
-      color: baseColor,
+      color: baseColor.withAlpha(100),
       borderRadius: const BorderRadius.horizontal(left: Radius.circular(32)),
     );
   }
 
   if (i == rangeEnd) {
     return BoxDecoration(
-      color: baseColor,
+      color: baseColor.withAlpha(100),
       borderRadius: const BorderRadius.horizontal(right: Radius.circular(32)),
     );
   }
@@ -46,7 +52,7 @@ BoxDecoration getRangeDecoration({
       i > rangeStart &&
       i < rangeEnd) {
     return BoxDecoration(
-      color: baseColor.withOpacity(0.5),
+      color: baseColor.withAlpha(100),
       borderRadius: BorderRadius.zero,
     );
   }
