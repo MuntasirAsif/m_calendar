@@ -1,3 +1,7 @@
+## [1.1.1]
+
+- Fix Example & example in `README.md`
+
 ## [1.1.0]
 
 - User can get the pick date data as a list of DateTime, not just a single DateTime.
