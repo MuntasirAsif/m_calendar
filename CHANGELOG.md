@@ -1,3 +1,10 @@
+## [1.1.2] - 2024-05-23
+
+### Fixed
+- Test folder added for CI support.
+- Updated CI/CD GitHub workflow.
+- Internal refactoring and cleanup.
+
 ## [1.1.1]
 
 - Fix Example & example in `README.md`
