@@ -2,8 +2,8 @@
 
 ### Fixed
 - Test folder added for CI support.
-- Updated CI/CD GitHub workflow.
-- Internal refactoring and cleanup.
+- Updated **CI/CD** GitHub workflow.
+- Internal _refactoring_ and _cleanup_.
 
 ## [1.1.1]
 
