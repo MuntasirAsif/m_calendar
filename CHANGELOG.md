@@ -1,4 +1,4 @@
-## [1.1.2] - 2024-05-23
+## [1.1.2]
 
 ### Fixed
 - Test folder added for CI support.
