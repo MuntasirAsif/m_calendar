@@ -1,3 +1,23 @@
+## [1.2.0]
+
+### Added
+- Introduced `MCalendar.weekly` for weekly calendar view with full week display.
+- Users can now select a range of dates on a weekly calendar, improving flexibility.
+
+### Fixed
+- Fixed UI alignment issues for weekly view cells.
+- Improved logic for handling date ranges in `MCalendar.weekly`.
+- Corrected month-week mapping for consistent weekly view rendering.
+
+### Changed
+- Modularized week layout and date selection logic for better maintainability.
+- Updated `MCalendar` constructor to support both monthly and weekly views seamlessly.
+
+### Improved
+- Enhanced styling and theming options for `MCalendar.weekly`.
+- Simplified the weekly calendar's cell padding and decoration logic.
+
+
 ## [1.1.2]
 
 ### Fixed

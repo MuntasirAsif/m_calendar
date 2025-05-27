@@ -59,75 +59,75 @@ class CalendarDateCell extends StatelessWidget {
     );
 
     final selectedModel = provider.selectedDaysList.firstWhere(
-          (model) => model.selectedDateList.any(
-            (d) =>
-        d.year == currentDate.year &&
+      (model) => model.selectedDateList.any(
+        (d) =>
+            d.year == currentDate.year &&
             d.month == currentDate.month &&
             d.day == currentDate.day,
       ),
       orElse:
           () => MarkedDaysModel(
-        selectedDateList: [],
-        decoration:
-        defaultDecoration ??
-            BoxDecoration(
-              color: Colors.transparent,
-              borderRadius: BorderRadius.circular(6),
-            ),
-      ),
+            selectedDateList: [],
+            decoration:
+                defaultDecoration ??
+                BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+          ),
     );
 
     final bool isUserPicked = provider.userPicked == i;
     final bool isInRange = provider.isRangeSelection && provider.isInRange(i);
 
     BoxDecoration finalDecoration =
-    isInRange
-        ? getRangeDecoration(
-      context: context,
-      i: i,
-      rangeStart: provider.rangeStart,
-      rangeEnd: provider.rangeEnd,
-      defaultDecoration: defaultDecoration,
-      baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
-    )
-        : isUserPicked
-        ? userPickedDecoration ??
-        selectedModel.decoration.copyWith(color: Colors.teal.shade400)
-        : selectedModel.decoration;
+        isInRange
+            ? getRangeDecoration(
+              context: context,
+              i: i,
+              rangeStart: provider.rangeStart,
+              rangeEnd: provider.rangeEnd,
+              defaultDecoration: defaultDecoration,
+              baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
+            )
+            : isUserPicked
+            ? userPickedDecoration ??
+                selectedModel.decoration.copyWith(color: Colors.teal.shade400)
+            : selectedModel.decoration;
 
     final Widget finalChild =
-    (isUserPicked || isInRange)
-        ? userPickedChild ??
-        userSelectedItemStyle ??
-        defaultChild ??
-        Center(child: Text(i.toString()))
-        : selectedModel.child ??
-        defaultChild ??
-        Center(child: Text(i.toString()));
+        (isUserPicked || isInRange)
+            ? userPickedChild ??
+                userSelectedItemStyle ??
+                defaultChild ??
+                Center(child: Text(i.toString()))
+            : selectedModel.child ??
+                defaultChild ??
+                Center(child: Text(i.toString()));
 
     final EdgeInsets finalMargin =
-    isInRange
-        ? const EdgeInsets.symmetric(horizontal: 0, vertical: 4)
-        : const EdgeInsets.all(4);
+        isInRange
+            ? const EdgeInsets.symmetric(horizontal: 0, vertical: 4)
+            : const EdgeInsets.all(4);
     final EdgeInsets finalPadding =
-    isInRange && cellPadding != null
-        ? EdgeInsets.zero
-        : cellPadding ?? const EdgeInsets.all(12);
+        isInRange && cellPadding != null
+            ? EdgeInsets.zero
+            : cellPadding ?? const EdgeInsets.all(12);
 
     bool rangePickHold =
         provider.rangeStart != null &&
-            provider.rangeEnd == null &&
-            provider.rangeStart == i;
+        provider.rangeEnd == null &&
+        provider.rangeStart == i;
     finalDecoration =
-    rangePickHold
-        ? (userPickedDecoration != null
-        ? userPickedDecoration!.copyWith(
-      color: userPickedDecoration!.color?.withValues(alpha: 128),
-    )
-        : selectedModel.decoration.copyWith(
-      color: Colors.teal.shade400.withValues(alpha: 128),
-    ))
-        : finalDecoration;
+        rangePickHold
+            ? (userPickedDecoration != null
+                ? userPickedDecoration!.copyWith(
+                  color: userPickedDecoration!.color?.withValues(alpha: 128),
+                )
+                : selectedModel.decoration.copyWith(
+                  color: Colors.teal.shade400.withValues(alpha: 128),
+                ))
+            : finalDecoration;
 
     return GestureDetector(
       onTap: () => provider.toggleUserPicked(i),
