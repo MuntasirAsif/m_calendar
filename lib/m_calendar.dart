@@ -7,9 +7,11 @@ import 'package:provider/provider.dart';
 
 import 'model/marked_date_model.dart';
 
+/// A flexible calendar widget that provides both monthly and weekly views.
 class MCalendar extends StatelessWidget {
-
-  /// Default constructor → redirects to monthly
+  /// Default constructor → redirects to monthly view.
+  ///
+  /// This constructor delegates the creation of the calendar to the `MCalendar.monthly` constructor.
   factory MCalendar({
     required DateTime selectedMonth,
     BoxDecoration? decoration,
@@ -34,9 +36,26 @@ class MCalendar extends StatelessWidget {
     onUserPicked: onUserPicked,
   );
 
-  const MCalendar._({required this.child, super.key});
+  const MCalendar._({required this.child});
 
-  /// Monthly view
+  /// Factory constructor for the monthly view of the calendar.
+  ///
+  /// This method initializes the `MonthlyCalenderTableProvider` and provides the month view layout.
+  /// It includes various customization options for decoration, user-picked dates, and range selection.
+  ///
+  /// Parameters:
+  /// - `selectedMonth`: The currently selected month (required).
+  /// - `decoration`: The decoration applied to the calendar container (optional).
+  /// - `markedDaysList`: A list of marked days to highlight in the calendar (optional).
+  /// - `weekNameHeaderStyle`: The style applied to the week name header (optional).
+  /// - `defaultChild`: The default child widget to display (optional).
+  /// - `isRangeSelection`: Flag indicating whether range selection is enabled (default is `false`).
+  /// - `userPickedDecoration`: The decoration for selected user-picked dates (optional).
+  /// - `userPickedChild`: The widget to display for selected user-picked dates (optional).
+  /// - `cellPadding`: The padding for each calendar cell (optional).
+  /// - `onUserPicked`: Callback triggered when the user picks a date (required).
+  ///
+  /// Returns an `MCalendar` widget with the monthly view.
   factory MCalendar.monthly({
     required DateTime selectedMonth,
     BoxDecoration? decoration,
@@ -54,13 +73,13 @@ class MCalendar extends StatelessWidget {
         create:
             (_) =>
                 MonthlyCalenderTableProvider()..initializeMonth(
-                  selectedMonth ?? DateTime.now(),
+                  selectedMonth,
                   markedDaysList,
                   isRangeSelection,
                   onUserPicked: onUserPicked,
                 ),
         child: MonthlyView(
-          selectedMonth: selectedMonth ?? DateTime.now(),
+          selectedMonth: selectedMonth,
           decoration: decoration,
           markedDaysList: markedDaysList,
           weekNameHeaderStyle: weekNameHeaderStyle,
@@ -74,7 +93,25 @@ class MCalendar extends StatelessWidget {
     );
   }
 
-  /// Weekly view
+  /// Factory constructor for the weekly view of the calendar.
+  ///
+  /// This method initializes the `WeeklyCalenderTableProvider` and provides the week view layout.
+  /// It includes various customization options for decoration, user-picked dates, and range selection.
+  ///
+  /// Parameters:
+  /// - `selectedMonth`: The currently selected month (required).
+  /// - `decoration`: The decoration applied to the calendar container (optional).
+  /// - `markedDaysList`: A list of marked days to highlight in the calendar (optional).
+  /// - `weekNameHeaderStyle`: The style applied to the week name header (optional).
+  /// - `defaultChild`: The default child widget to display (optional).
+  /// - `isRangeSelection`: Flag indicating whether range selection is enabled (default is `false`).
+  /// - `userPickedDecoration`: The decoration for selected user-picked dates (optional).
+  /// - `userPickedChild`: The widget to display for selected user-picked dates (optional).
+  /// - `cellPadding`: The padding for each calendar cell (optional).
+  /// - `startDay`: The starting day of the week (default is Saturday).
+  /// - `onUserPicked`: Callback triggered when the user picks a date (required).
+  ///
+  /// Returns an `MCalendar` widget with the weekly view.
   factory MCalendar.weekly({
     required DateTime selectedMonth,
     BoxDecoration? decoration,
@@ -85,6 +122,7 @@ class MCalendar extends StatelessWidget {
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
     EdgeInsets? cellPadding,
+    Day startDay = Day.saturday,
     required void Function(List<DateTime>) onUserPicked,
   }) {
     return MCalendar._(
@@ -93,6 +131,7 @@ class MCalendar extends StatelessWidget {
             (_) =>
                 WeeklyCalenderTableProvider()..initializeMonth(
                   selectedMonth,
+                  startDay,
                   markedDaysList,
                   isRangeSelection,
                   onUserPicked: onUserPicked,
@@ -108,12 +147,13 @@ class MCalendar extends StatelessWidget {
           decoration: decoration,
           defaultChild: defaultChild,
           isRangeSelection: isRangeSelection,
+          startDay: startDay,
         ),
       ),
     );
   }
 
-
+  /// The child widget displayed by the `MCalendar` widget.
   final Widget child;
 
   @override
