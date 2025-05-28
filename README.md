@@ -7,9 +7,9 @@ A customizable and lightweight Flutter calendar widget package for list-based da
 ## 🖼️ Previews
 
 <p float="left">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview.png" width="300" alt="Calendar Preview 1">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_1.png" width="300" alt="Calendar Preview 2">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/calendar_preview_2.png" width="300" alt="Calendar Preview 3">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/Monthly_range_selection.gif" width="300" alt="Calendar Preview 1">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/Monthly_single_selection.gif" width="300" alt="Calendar Preview 2">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/assets/Weekly_Calendar.gif" width="300" alt="Calendar Preview 3">
 </p>
 
 ---
@@ -25,7 +25,28 @@ A customizable and lightweight Flutter calendar widget package for list-based da
 - 🧩 **Easy Integration** – Embeddable in any UI and layout.
 
 ---
+## Monthly Calendar
+```dart
+MCalendar(
+    selectedMonth: DateTime.now(),
+    onUserPicked: (value) {
+    debugPrint('User Get: $value');
+    },
+),
+```
 
+## Weekly Calendar View
+```dart
+MCalendar.weekly(
+    startDay: Day.sunday,
+    isRangeSelection: false,
+    selectedMonth: DateTime.now(),
+    onUserPicked: (value) {
+    debugPrint('User Get: $value');
+    },
+),
+```
+---
 ## 🚀 Getting Started
 
 ### 1️⃣ Add Dependency
