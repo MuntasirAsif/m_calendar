@@ -9,7 +9,7 @@ A customizable and lightweight Flutter calendar widget package for list-based da
 <p float="left">
   <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/Monthly_range_selection.gif" width="300" alt="Calendar Preview 1">
   <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/Monthly_single_selection.gif" width="300" alt="Calendar Preview 2">
-  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/assets/Weekly_Calendar.gif" width="300" alt="Calendar Preview 3">
+  <img src="https://raw.githubusercontent.com/MuntasirAsif/m_calendar/main/assets/Weekly_Calendar.gif" width="300" alt="Calendar Preview 3">
 </p>
 
 ---
@@ -55,4 +55,4 @@ Add this to your `pubspec.yaml`:
 
 ```yaml
 dependencies:
-  m_calendar: ^1.2.0
+  m_calendar: ^1.2.1
