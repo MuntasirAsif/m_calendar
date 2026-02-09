@@ -1,3 +1,7 @@
+## [1.3.1]
+- Add horizontal view calendar
+- Add horizontal scrollable calendar
+
 ## [1.2.1]
 - Update preview gif
 

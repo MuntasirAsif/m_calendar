@@ -161,21 +161,26 @@ class MCalendar extends StatelessWidget {
     required DateTime selectedMonth,
     BoxDecoration? decoration,
     List<MarkedDaysModel>? markedDaysList,
-    TextStyle? weekNameHeaderStyle,
     Widget? defaultChild,
     bool isRangeSelection = false,
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
-    EdgeInsets? cellPadding,
-    Day startDay = Day.saturday,
     required void Function(List<DateTime>) onUserPicked,
   }) {
     return MCalendar._(
       child: ChangeNotifierProvider(
         create:
-            (context) =>
-                HorizontalCalendarProvider()..setSelectedMonth(selectedMonth),
-        child: const HorizontalView(),
+            (context) => HorizontalCalendarProvider(
+              isRangeSelection: isRangeSelection,
+              markedDaysList: markedDaysList,
+              onUserPicked: onUserPicked,
+            )..setSelectedMonth(selectedMonth),
+        child: HorizontalView(
+          decoration: decoration,
+          defaultChild: defaultChild,
+          userPickedDecoration: userPickedDecoration,
+          userPickedChild: userPickedChild,
+        ),
       ),
     );
   }
