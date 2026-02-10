@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
+import 'package:m_calendar/provider/horizontal_calendar_provider.dart';
 import 'package:m_calendar/provider/monthly_calender_table_provider.dart';
 import 'package:m_calendar/provider/weekly_calendar_table_provider.dart';
+import 'package:m_calendar/view/horizontal_view.dart';
 import 'package:m_calendar/view/monthly_view.dart';
 import 'package:m_calendar/view/weekly_view.dart';
 import 'package:provider/provider.dart';
@@ -149,6 +151,31 @@ class MCalendar extends StatelessWidget {
           isRangeSelection: isRangeSelection,
           startDay: startDay,
         ),
+      ),
+    );
+  }
+
+  /// Factory constructor for the horizontal view of the calendar.
+  ///
+  factory MCalendar.horizontal({
+    required DateTime selectedMonth,
+    BoxDecoration? decoration,
+    List<MarkedDaysModel>? markedDaysList,
+    TextStyle? weekNameHeaderStyle,
+    Widget? defaultChild,
+    bool isRangeSelection = false,
+    BoxDecoration? userPickedDecoration,
+    Widget? userPickedChild,
+    EdgeInsets? cellPadding,
+    Day startDay = Day.saturday,
+    required void Function(List<DateTime>) onUserPicked,
+  }) {
+    return MCalendar._(
+      child: ChangeNotifierProvider(
+        create:
+            (context) =>
+                HorizontalCalendarProvider()..setSelectedMonth(selectedMonth),
+        child: const HorizontalView(),
       ),
     );
   }
