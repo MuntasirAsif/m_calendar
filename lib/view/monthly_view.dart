@@ -1,4 +1,6 @@
 import 'package:flutter/material.dart';
+import 'package:m_calendar/provider/calendar_header_provider.dart';
+import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
 import '../provider/monthly_calender_table_provider.dart';
@@ -23,6 +25,7 @@ class MonthlyView extends StatelessWidget {
     this.userPickedChild,
     this.cellPadding,
     required this.onUserPicked,
+    required this.showMonthYearPicker,
   });
 
   /// The currently selected month for the calendar.
@@ -71,12 +74,35 @@ class MonthlyView extends StatelessWidget {
   /// This callback provides a list of `DateTime` objects representing the selected dates.
   final void Function(List<DateTime>) onUserPicked;
 
+  /// A flag indicating whether to show the month and year picker in the calendar header.
+  ///
+  /// When set to `true`, the month and year picker will be displayed in the calendar header.
+  ///
+  /// Defaults to `true`.
+  final bool showMonthYearPicker;
+
   @override
   Widget build(BuildContext context) {
     return Consumer<MonthlyCalenderTableProvider>(
       builder: (_, provider, __) {
         return Column(
           children: [
+            if (showMonthYearPicker)
+              ChangeNotifierProvider(
+                create: (BuildContext context) {
+                  return CalendarHeaderProvider(selectedMonth);
+                },
+                child: CalendarHeaderView(
+                  onMonthChanged: (value) {
+                    provider.initializeMonth(
+                      value,
+                      provider.selectedDaysList,
+                      provider.isRangeSelection,
+                      onUserPicked: onUserPicked,
+                    );
+                  },
+                ),
+              ),
             Table(
               children: [
                 // Week header row (e.g., "Mon", "Tue", "Wed", etc.)

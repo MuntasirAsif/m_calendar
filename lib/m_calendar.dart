@@ -21,6 +21,7 @@ class MCalendar extends StatelessWidget {
     TextStyle? weekNameHeaderStyle,
     Widget? defaultChild,
     bool isRangeSelection = false,
+    bool showMonthYearPicker = false,
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
     EdgeInsets? cellPadding,
@@ -36,6 +37,7 @@ class MCalendar extends StatelessWidget {
     userPickedChild: userPickedChild,
     cellPadding: cellPadding,
     onUserPicked: onUserPicked,
+    showMonthYearPicker: showMonthYearPicker,
   );
 
   const MCalendar._({required this.child});
@@ -65,6 +67,7 @@ class MCalendar extends StatelessWidget {
     TextStyle? weekNameHeaderStyle,
     Widget? defaultChild,
     bool isRangeSelection = false,
+    bool showMonthYearPicker = true,
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
     EdgeInsets? cellPadding,
@@ -90,6 +93,7 @@ class MCalendar extends StatelessWidget {
           userPickedChild: userPickedChild,
           cellPadding: cellPadding,
           onUserPicked: onUserPicked,
+          showMonthYearPicker: showMonthYearPicker,
         ),
       ),
     );
@@ -163,9 +167,18 @@ class MCalendar extends StatelessWidget {
     List<MarkedDaysModel>? markedDaysList,
     Widget? defaultChild,
     bool isRangeSelection = false,
+    bool showMonthYearPicker = false,
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
     required void Function(List<DateTime>) onUserPicked,
+    double? headerHeight,
+    Color? headerIconColor,
+    TextStyle? headerTextStyle,
+    Color? monthYearPickerSelectedMonthColor,
+    Color? monthYearPickerUnselectedMonthColor,
+    int? monthYearPickerCrossAxisCount,
+    double? monthYearPickerChildAspectRatio,
+    BoxDecoration? monthYearPickerMonthItemDecoration,
   }) {
     return MCalendar._(
       child: ChangeNotifierProvider(
@@ -180,6 +193,17 @@ class MCalendar extends StatelessWidget {
           defaultChild: defaultChild,
           userPickedDecoration: userPickedDecoration,
           userPickedChild: userPickedChild,
+          showMonthYearPicker: showMonthYearPicker,
+          headerHeight: headerHeight,
+          headerIconColor: headerIconColor,
+          headerTextStyle: headerTextStyle,
+          monthYearPickerSelectedMonthColor: monthYearPickerSelectedMonthColor,
+          monthYearPickerUnselectedMonthColor:
+              monthYearPickerUnselectedMonthColor,
+          monthYearPickerCrossAxisCount: monthYearPickerCrossAxisCount,
+          monthYearPickerChildAspectRatio: monthYearPickerChildAspectRatio,
+          monthYearPickerMonthItemDecoration:
+              monthYearPickerMonthItemDecoration,
         ),
       ),
     );
