@@ -2,39 +2,59 @@ import 'package:flutter/material.dart';
 
 import '../model/marked_date_model.dart';
 
-/// A provider for a horizontal calendar view.
+/// A provider that manages state for a horizontal calendar.
+///
+/// It handles:
+/// - Currently selected month
+/// - Currently selected day
+/// - Marked days
+/// - User date selection callbacks
 class HorizontalCalendarProvider extends ChangeNotifier {
   /// Creates a new instance of [HorizontalCalendarProvider].
+  ///
+  /// [isRangeSelection] determines whether the calendar supports range selection.
+  ///
+  /// [onUserPicked] is triggered when user selects a date.
+  ///
+  /// [markedDaysList] contains optional marked dates that can be highlighted.
   HorizontalCalendarProvider({
     required this.isRangeSelection,
     required this.onUserPicked,
     this.markedDaysList,
   });
+
+  /// Internal storage for selected month.
   DateTime _selectedMonth = DateTime.now();
+
+  /// Internal storage for selected day.
   DateTime _selectedDay = DateTime.now();
 
-  /// Creates a new instance of [HorizontalCalendarProvider].
+  /// Indicates whether range selection is enabled.
   final bool isRangeSelection;
 
-  /// The list of marked days.
+  /// Optional list of marked days to highlight in calendar.
   final List<MarkedDaysModel>? markedDaysList;
 
-  /// The callback function to handle user-picked dates.
+  /// Callback triggered when user selects date(s).
   final void Function(List<DateTime>) onUserPicked;
 
-  /// The selected month.
+  /// Currently selected month.
   DateTime get selectedMonth => _selectedMonth;
 
-  /// The selected day.
+  /// Currently selected day.
   DateTime get selectedDay => _selectedDay;
 
-  /// Sets the selected month.
+  /// Updates the selected month and notifies listeners.
   void setSelectedMonth(DateTime month) {
     _selectedMonth = month;
     notifyListeners();
   }
 
-  /// Returns a list of days in the selected month.
+  /// Returns all days available in the currently selected month.
+  ///
+  /// Example:
+  /// If selected month is February 2026,
+  /// this returns all dates from Feb 1 → Feb 28/29.
   List<DateTime> get daysInMonth {
     final totalDays =
         DateTime(_selectedMonth.year, _selectedMonth.month + 1, 0).day;
@@ -45,7 +65,7 @@ class HorizontalCalendarProvider extends ChangeNotifier {
     );
   }
 
-  /// Sets the selected day.
+  /// Updates the selected day and triggers [onUserPicked].
   void setSelectedDay(DateTime day) {
     _selectedDay = day;
 
@@ -54,7 +74,9 @@ class HorizontalCalendarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Checks if a day is marked.
+  /// Returns `true` if the given [date] exists inside [markedDaysList].
+  ///
+  /// Used to visually highlight marked dates in UI.
   bool isMarked(DateTime date) {
     if (markedDaysList == null) return false;
 
