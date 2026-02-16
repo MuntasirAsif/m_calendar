@@ -17,11 +17,7 @@ class HorizontalCalendarProvider extends ChangeNotifier {
   /// [onUserPicked] is triggered when user selects a date.
   ///
   /// [markedDaysList] contains optional marked dates that can be highlighted.
-  HorizontalCalendarProvider({
-    required this.isRangeSelection,
-    required this.onUserPicked,
-    this.markedDaysList,
-  });
+  HorizontalCalendarProvider({required this.onUserPicked, this.markedDaysList});
 
   /// Internal storage for selected month.
   DateTime _selectedMonth = DateTime.now();
@@ -29,14 +25,11 @@ class HorizontalCalendarProvider extends ChangeNotifier {
   /// Internal storage for selected day.
   DateTime _selectedDay = DateTime.now();
 
-  /// Indicates whether range selection is enabled.
-  final bool isRangeSelection;
-
   /// Optional list of marked days to highlight in calendar.
   final List<MarkedDaysModel>? markedDaysList;
 
   /// Callback triggered when user selects date(s).
-  final void Function(List<DateTime>) onUserPicked;
+  final void Function(DateTime) onUserPicked;
 
   /// Currently selected month.
   DateTime get selectedMonth => _selectedMonth;
@@ -69,7 +62,7 @@ class HorizontalCalendarProvider extends ChangeNotifier {
   void setSelectedDay(DateTime day) {
     _selectedDay = day;
 
-    onUserPicked([day]);
+    onUserPicked(day);
 
     notifyListeners();
   }

@@ -166,11 +166,10 @@ class MCalendar extends StatelessWidget {
     BoxDecoration? decoration,
     List<MarkedDaysModel>? markedDaysList,
     Widget? defaultChild,
-    bool isRangeSelection = false,
     bool showMonthYearPicker = false,
     BoxDecoration? userPickedDecoration,
     Widget? userPickedChild,
-    required void Function(List<DateTime>) onUserPicked,
+    required void Function(DateTime) onUserPicked,
     double? headerHeight,
     Color? headerIconColor,
     TextStyle? headerTextStyle,
@@ -179,12 +178,19 @@ class MCalendar extends StatelessWidget {
     int? monthYearPickerCrossAxisCount,
     double? monthYearPickerChildAspectRatio,
     BoxDecoration? monthYearPickerMonthItemDecoration,
+    bool showWeekDays = true,
+    TextStyle? dateTextStyle,
+    TextStyle? weekDaysTextStyle,
+    TextStyle? selectedDateTextStyle,
+    TextStyle? selectedWeekDaysTextStyle,
+    DateTime? initialDate,
+    DateTime? endDate,
+    bool autoScroll = true,
   }) {
     return MCalendar._(
       child: ChangeNotifierProvider(
         create:
             (context) => HorizontalCalendarProvider(
-              isRangeSelection: isRangeSelection,
               markedDaysList: markedDaysList,
               onUserPicked: onUserPicked,
             )..setSelectedMonth(selectedMonth),
@@ -204,6 +210,14 @@ class MCalendar extends StatelessWidget {
           monthYearPickerChildAspectRatio: monthYearPickerChildAspectRatio,
           monthYearPickerMonthItemDecoration:
               monthYearPickerMonthItemDecoration,
+          showWeekDays: showWeekDays,
+          dateTextStyle: dateTextStyle,
+          weekDaysTextStyle: weekDaysTextStyle,
+          selectedDateTextStyle: selectedDateTextStyle,
+          selectedWeekDaysTextStyle: selectedWeekDaysTextStyle,
+          initialDate: initialDate,
+          endDate: endDate,
+          autoScroll: autoScroll,
         ),
       ),
     );
