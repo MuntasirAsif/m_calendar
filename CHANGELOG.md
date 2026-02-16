@@ -1,3 +1,7 @@
+## [1.3.5]
+- Add horizontal view calendar with custom decoration
+- Update Redme.md
+
 ## [1.3.4]
 - Add horizontal view calendar with custom decoration
 - Add horizontal view calendar with custom decoration and custom child widget
