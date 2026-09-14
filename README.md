@@ -32,6 +32,23 @@ A customizable, lightweight Flutter calendar package with **monthly**, **weekly*
 
 ---
 
+## 📝 Behavioral notes
+
+- Monthly and weekly views start the week on **Saturday** by default. Pass
+  `startDay` (e.g. `Day.monday`) to change it.
+- The weekly view reports a single picked date per tap (the first day of the
+  selected week). The `isRangeSelection` flag is accepted for API symmetry, but
+  weekly range selection is not implemented yet.
+- The horizontal view is always single-select, and `selectedDay` is initialized
+  to *today* before any interaction — so `controller.selectedDates` returns
+  `[today]` until the user (or controller) picks another date.
+- A cross-month range set via `controller.selectRange(start, end)` is truncated
+  to the end of the start month.
+- Attach one `MCalendarController` per `MCalendar` widget. Attaching the same
+  controller to multiple calendars is not supported.
+
+---
+
 ## 🚀 Installation
 
 Add to your `pubspec.yaml`:
@@ -331,6 +348,7 @@ MCalendar.horizontal(
 | `isDateDisabled` | `bool Function(DateTime)?` | `null` | Predicate to disable specific dates. |
 | `disabledDecoration` | `BoxDecoration?` | `null` | Decoration for disabled day cells. |
 | `disabledTextStyle` | `TextStyle?` | `null` | Text style for disabled day cell numbers. |
+| `startDay` | `Day` | `Day.saturday` | First day of the week; changes cell alignment and header labels. |
 
 ### `MCalendar.weekly`
 

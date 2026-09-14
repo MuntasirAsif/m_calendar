@@ -1,5 +1,4 @@
 import 'package:flutter/material.dart';
-import 'package:m_calendar/provider/calendar_header_provider.dart';
 import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
@@ -7,6 +6,7 @@ import '../controller/m_calendar_controller.dart';
 import '../model/day_state.dart';
 import '../model/marked_date_model.dart';
 import '../provider/monthly_calender_table_provider.dart';
+import '../provider/weekly_calendar_table_provider.dart' show Day;
 import '../widgets/calendar_date_cell.dart';
 
 /// A widget that displays the monthly calendar view, showing the days of a month
@@ -14,7 +14,7 @@ import '../widgets/calendar_date_cell.dart';
 ///
 /// Supports single date selection, range selection, marked dates, custom day
 /// builders, date disabling (via [minDate], [maxDate], or [isDateDisabled]),
-/// and programmatic control via [MCalendarController].
+/// customizable week [startDay], and programmatic control via [MCalendarController].
 class MonthlyView extends StatefulWidget {
   /// Constructs a [MonthlyView] widget.
   const MonthlyView({
@@ -36,6 +36,7 @@ class MonthlyView extends StatefulWidget {
     this.isDateDisabled,
     this.disabledDecoration,
     this.disabledTextStyle,
+    this.startDay = Day.saturday,
   });
 
   /// The currently selected month for the calendar.
@@ -89,19 +90,14 @@ class MonthlyView extends StatefulWidget {
   /// Custom text style applied to disabled date numbers.
   final TextStyle? disabledTextStyle;
 
+  /// Starting day of the week for column ordering. Defaults to [Day.saturday].
+  final Day startDay;
+
   @override
   State<MonthlyView> createState() => _MonthlyViewState();
 }
 
 class _MonthlyViewState extends State<MonthlyView> {
-  CalendarHeaderProvider? _headerProvider;
-
-  @override
-  void initState() {
-    super.initState();
-    _headerProvider = CalendarHeaderProvider(widget.selectedMonth);
-  }
-
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
@@ -125,8 +121,12 @@ class _MonthlyViewState extends State<MonthlyView> {
       widget.controller?.attach(provider);
     }
 
-    if (oldWidget.selectedMonth.year != widget.selectedMonth.year ||
-        oldWidget.selectedMonth.month != widget.selectedMonth.month) {
+    final monthChanged =
+        oldWidget.selectedMonth.year != widget.selectedMonth.year ||
+        oldWidget.selectedMonth.month != widget.selectedMonth.month ||
+        oldWidget.startDay != widget.startDay;
+
+    if (monthChanged) {
       provider.initializeMonth(
         widget.selectedMonth,
         widget.markedDaysList ?? provider.selectedDaysList,
@@ -135,15 +135,29 @@ class _MonthlyViewState extends State<MonthlyView> {
         minDate: widget.minDate,
         maxDate: widget.maxDate,
         isDateDisabled: widget.isDateDisabled,
+        startDay: widget.startDay,
+        // The tree is already rebuilding; notifying synchronously while the
+        // element tree is being updated is disallowed by the framework.
+        notify: false,
       );
-      _headerProvider?.setMonth(widget.selectedMonth);
+    } else if (oldWidget.minDate != widget.minDate ||
+        oldWidget.maxDate != widget.maxDate ||
+        oldWidget.isDateDisabled != widget.isDateDisabled ||
+        oldWidget.markedDaysList != widget.markedDaysList) {
+      // Propagate config changes without resetting the current selection.
+      provider.updateConfiguration(
+        minDate: widget.minDate,
+        maxDate: widget.maxDate,
+        isDateDisabled: widget.isDateDisabled,
+        markedDaysList: widget.markedDaysList,
+        notify: false,
+      );
     }
   }
 
   @override
   void dispose() {
     widget.controller?.detach();
-    _headerProvider?.dispose();
     super.dispose();
   }
 
@@ -151,33 +165,23 @@ class _MonthlyViewState extends State<MonthlyView> {
   Widget build(BuildContext context) {
     return Consumer<MonthlyCalendarTableProvider>(
       builder: (_, provider, __) {
-        if (_headerProvider != null &&
-            (_headerProvider!.selectedMonth.year !=
-                    provider.selectedMonth.year ||
-                _headerProvider!.selectedMonth.month !=
-                    provider.selectedMonth.month)) {
-          _headerProvider!.setMonth(provider.selectedMonth);
-        }
-
         return Column(
           children: [
-            if (widget.showMonthYearPicker && _headerProvider != null)
-              ChangeNotifierProvider.value(
-                value: _headerProvider!,
-                child: CalendarHeaderView(
-                  onMonthChanged: (value) {
-                    provider.initializeMonth(
-                      value,
-                      provider.selectedDaysList,
-                      provider.isRangeSelection,
-                      onUserPicked: widget.onUserPicked,
-                      minDate: widget.minDate,
-                      maxDate: widget.maxDate,
-                      isDateDisabled: widget.isDateDisabled,
-                    );
-                    widget.controller?.setMonth(value);
-                  },
-                ),
+            if (widget.showMonthYearPicker)
+              CalendarHeaderView(
+                displayedMonth: provider.selectedMonth,
+                onMonthChanged: (value) {
+                  provider.initializeMonth(
+                    value,
+                    provider.selectedDaysList,
+                    provider.isRangeSelection,
+                    onUserPicked: widget.onUserPicked,
+                    minDate: widget.minDate,
+                    maxDate: widget.maxDate,
+                    isDateDisabled: widget.isDateDisabled,
+                    startDay: widget.startDay,
+                  );
+                },
               ),
             Table(
               children: [

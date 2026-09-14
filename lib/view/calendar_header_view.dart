@@ -9,6 +9,7 @@ class CalendarHeaderView extends StatelessWidget {
   /// Constructor for CalendarHeaderView
   ///
   ///   * [onMonthChanged] - Callback when month changes
+  ///   * [displayedMonth] - Optional direct month to display (avoids provider requirement)
   ///   * [textStyle] - Text style for the month/year label
   ///   * [iconColor] - Color for the previous/next arrow icons
   ///   * [selectedMonthColor] - Color of selected month in the picker grid
@@ -21,6 +22,7 @@ class CalendarHeaderView extends StatelessWidget {
   const CalendarHeaderView({
     super.key,
     required this.onMonthChanged,
+    this.displayedMonth,
     this.textStyle,
     this.iconColor,
     this.selectedMonthColor,
@@ -33,6 +35,9 @@ class CalendarHeaderView extends StatelessWidget {
 
   /// Callback when month changes
   final ValueChanged<DateTime> onMonthChanged;
+
+  /// The currently displayed month. If provided, overrides [CalendarHeaderProvider].
+  final DateTime? displayedMonth;
 
   /// Text style for the month/year label
   final TextStyle? textStyle;
@@ -60,8 +65,9 @@ class CalendarHeaderView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final headerProvider = context.watch<CalendarHeaderProvider>();
-    final selectedMonth = headerProvider.selectedMonth;
+    final headerProvider = Provider.of<CalendarHeaderProvider?>(context);
+    final selectedMonth =
+        displayedMonth ?? headerProvider?.selectedMonth ?? DateTime.now();
     final formattedMonth = DateFormat('MMMM yyyy').format(selectedMonth);
 
     return Row(
@@ -71,15 +77,21 @@ class CalendarHeaderView extends StatelessWidget {
           tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
           icon: Icon(Icons.chevron_left, color: iconColor),
           onPressed: () {
-            headerProvider.previousMonth();
-            onMonthChanged(headerProvider.selectedMonth);
+            final prev = DateTime(selectedMonth.year, selectedMonth.month - 1);
+            headerProvider?.previousMonth();
+            onMonthChanged(prev);
           },
         ),
         Semantics(
           button: true,
           label: 'Change month',
           child: GestureDetector(
-            onTap: () => _showMonthYearPicker(context, headerProvider),
+            onTap:
+                () => _showMonthYearPicker(
+                  context,
+                  selectedMonth,
+                  headerProvider,
+                ),
             child: Text(
               formattedMonth,
               style: textStyle ?? Theme.of(context).textTheme.titleMedium,
@@ -90,8 +102,9 @@ class CalendarHeaderView extends StatelessWidget {
           tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
           icon: Icon(Icons.chevron_right, color: iconColor),
           onPressed: () {
-            headerProvider.nextMonth();
-            onMonthChanged(headerProvider.selectedMonth);
+            final next = DateTime(selectedMonth.year, selectedMonth.month + 1);
+            headerProvider?.nextMonth();
+            onMonthChanged(next);
           },
         ),
       ],
@@ -100,9 +113,10 @@ class CalendarHeaderView extends StatelessWidget {
 
   void _showMonthYearPicker(
     BuildContext context,
-    CalendarHeaderProvider provider,
+    DateTime currentMonth,
+    CalendarHeaderProvider? provider,
   ) {
-    int tempYear = provider.selectedMonth.year;
+    int tempYear = currentMonth.year;
 
     showModalBottomSheet(
       context: context,
@@ -154,13 +168,14 @@ class CalendarHeaderView extends StatelessWidget {
                         ).format(DateTime(tempYear, month));
 
                         final isSelected =
-                            provider.selectedMonth.year == tempYear &&
-                            provider.selectedMonth.month == month;
+                            currentMonth.year == tempYear &&
+                            currentMonth.month == month;
 
                         return GestureDetector(
                           onTap: () {
-                            provider.setMonth(DateTime(tempYear, month));
-                            onMonthChanged(provider.selectedMonth);
+                            final picked = DateTime(tempYear, month);
+                            provider?.setMonth(picked);
+                            onMonthChanged(picked);
                             Navigator.pop(context);
                           },
                           child: Container(

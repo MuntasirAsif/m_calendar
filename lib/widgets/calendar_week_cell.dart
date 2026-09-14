@@ -77,14 +77,23 @@ class WeeklyCalendarDateCell extends StatelessWidget {
                   '${firstDate.day}-${lastDate.day}',
                 ); // Display default date range
 
-    return GestureDetector(
-      onTap: isBlank ? null : onTap, // Disable tap if the cell is blank
-      child: Container(
-        padding:
-            cellPadding ??
-            const EdgeInsets.all(6), // Padding for content inside the cell
-        decoration: decoration,
-        child: Center(child: child), // Center the content inside the cell
+    return Semantics(
+      button: !isBlank,
+      enabled: !isBlank,
+      selected: isSelected,
+      label:
+          isBlank
+              ? ''
+              : '${firstDate.month}/${firstDate.day} to ${lastDate.month}/${lastDate.day}',
+      child: GestureDetector(
+        onTap: isBlank ? null : onTap, // Disable tap if the cell is blank
+        child: Container(
+          padding:
+              cellPadding ??
+              const EdgeInsets.all(6), // Padding for content inside the cell
+          decoration: decoration,
+          child: Center(child: child), // Center the content inside the cell
+        ),
       ),
     );
   }

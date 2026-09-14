@@ -1,62 +1,40 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
+import 'package:m_calendar/provider/horizontal_calendar_provider.dart';
 import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
-import '../provider/calendar_header_provider.dart';
-import '../provider/horizontal_calendar_provider.dart';
+import '../controller/m_calendar_controller.dart';
 
-/// A horizontally scrollable calendar widget that shows a month's days in a
-/// single row. The widget supports marking days, custom cell widgets/decoration
-/// and an optional month/year picker header.
+/// Horizontal scrolling calendar view.
+///
+/// Shows dates of the selected month horizontally with single-date selection
+/// and optional custom decorations for default, marked, and selected states.
 class HorizontalView extends StatefulWidget {
-  /// Creates a new instance of the [HorizontalView] widget with default values.
-  ///
-  /// This constructor initializes `initialDate` and `endDate` to `DateTime.now()`
-  /// and enables `autoScroll` by default.
+  /// Default factory constructor with pre-configured decorations.
   factory HorizontalView.defaults({
-    Key? key,
-    BoxDecoration? decoration,
-    BoxDecoration? userPickedDecoration,
-    Widget? defaultChild,
-    Widget? userPickedChild,
-    required bool showMonthYearPicker,
-    TextStyle? headerTextStyle,
-    Color? headerIconColor,
-    double? headerHeight,
-    Color? monthYearPickerSelectedMonthColor,
-    Color? monthYearPickerUnselectedMonthColor,
-    int? monthYearPickerCrossAxisCount,
-    double? monthYearPickerChildAspectRatio,
-    BoxDecoration? monthYearPickerMonthItemDecoration,
+    required DateTime selectedMonth,
+    required void Function(DateTime) onUserPicked,
     bool showWeekDays = true,
     TextStyle? dateTextStyle,
     TextStyle? weekDaysTextStyle,
     TextStyle? selectedDateTextStyle,
     TextStyle? selectedWeekDaysTextStyle,
+    DateTime? initialDate,
+    DateTime? endDate,
+    MCalendarController? controller,
   }) {
     return HorizontalView(
-      key: key,
-      decoration: decoration,
-      userPickedDecoration: userPickedDecoration,
-      defaultChild: defaultChild,
-      userPickedChild: userPickedChild,
-      showMonthYearPicker: showMonthYearPicker,
-      headerTextStyle: headerTextStyle,
-      headerIconColor: headerIconColor,
-      headerHeight: headerHeight,
-      monthYearPickerSelectedMonthColor: monthYearPickerSelectedMonthColor,
-      monthYearPickerUnselectedMonthColor: monthYearPickerUnselectedMonthColor,
-      monthYearPickerCrossAxisCount: monthYearPickerCrossAxisCount,
-      monthYearPickerChildAspectRatio: monthYearPickerChildAspectRatio,
-      monthYearPickerMonthItemDecoration: monthYearPickerMonthItemDecoration,
+      selectedMonth: selectedMonth,
+      onUserPicked: onUserPicked,
       showWeekDays: showWeekDays,
       dateTextStyle: dateTextStyle,
       weekDaysTextStyle: weekDaysTextStyle,
       selectedDateTextStyle: selectedDateTextStyle,
       selectedWeekDaysTextStyle: selectedWeekDaysTextStyle,
-      initialDate: DateTime.now(),
-      endDate: DateTime.now(),
+      initialDate: initialDate,
+      endDate: endDate,
+      controller: controller,
     );
   }
 
@@ -64,14 +42,14 @@ class HorizontalView extends StatefulWidget {
   ///
   /// [showMonthYearPicker] controls whether the month/year picker header is
   /// shown. [initialDate] (optional) determines where the list will auto-scroll
-  /// on first build when [autoScroll] is true.
+  /// on first build when [autoScroll] is true, and acts as the lower date bound.
   const HorizontalView({
     super.key,
     this.decoration,
     this.userPickedDecoration,
     this.defaultChild,
     this.userPickedChild,
-    required this.showMonthYearPicker,
+    this.showMonthYearPicker = false,
     this.headerTextStyle,
     this.headerIconColor,
     this.headerHeight,
@@ -88,7 +66,16 @@ class HorizontalView extends StatefulWidget {
     this.endDate,
     this.initialDate,
     this.autoScroll = true,
+    this.controller,
+    required this.selectedMonth,
+    required this.onUserPicked,
   });
+
+  /// The month displayed in this view.
+  final DateTime selectedMonth;
+
+  /// Callback fired with the picked date when tapped.
+  final void Function(DateTime) onUserPicked;
 
   /// Decoration applied to non-selected date cells.
   final BoxDecoration? decoration;
@@ -96,8 +83,7 @@ class HorizontalView extends StatefulWidget {
   /// Decoration applied to the currently selected date cell.
   final BoxDecoration? userPickedDecoration;
 
-  /// Optional widget used for unselected date cells. If null a default
-  /// vertically stacked day + weekday layout is used.
+  /// Optional widget used for unselected date cells.
   final Widget? defaultChild;
 
   /// Optional widget used for the selected date cell.
@@ -145,17 +131,17 @@ class HorizontalView extends StatefulWidget {
   /// Text style used for the weekday label in the selected cell.
   final TextStyle? selectedWeekDaysTextStyle;
 
-  /// Optional date to scroll to on first build (if [autoScroll] is true).
+  /// Optional date to scroll to on first build (if [autoScroll] is true) and earliest selectable date.
   final DateTime? initialDate;
 
-  /// If true the view will automatically scroll to [initialDate] when
-  /// first built. Defaults to `true` but can be set to `false` to let
-  /// external layout or controllers manage initial offset.
+  /// If true the view will automatically scroll to [initialDate] when first built.
   final bool autoScroll;
 
-  /// Optional last selectable date. Dates after this will be considered
-  /// unselectable.
+  /// Optional latest selectable date. Dates after this will be unselectable.
   final DateTime? endDate;
+
+  /// Optional controller to programmatically drive calendar navigation and selections.
+  final MCalendarController? controller;
 
   @override
   State<HorizontalView> createState() => _HorizontalViewState();
@@ -170,13 +156,46 @@ class _HorizontalViewState extends State<HorizontalView> {
       DateTime(date.year, date.month, date.day);
 
   @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = Provider.of<HorizontalCalendarProvider>(
+      context,
+      listen: false,
+    );
+    widget.controller?.attach(provider);
+  }
+
+  @override
+  void didUpdateWidget(HorizontalView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final provider = Provider.of<HorizontalCalendarProvider>(
+      context,
+      listen: false,
+    );
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.detach();
+      widget.controller?.attach(provider);
+    }
+
+    if (oldWidget.selectedMonth.year != widget.selectedMonth.year ||
+        oldWidget.selectedMonth.month != widget.selectedMonth.month) {
+      provider.setSelectedMonth(widget.selectedMonth);
+      _hasScrolled = false;
+    }
+  }
+
+  @override
   void dispose() {
+    widget.controller?.detach();
     _scrollController.dispose();
     super.dispose();
   }
 
   void _maybeScrollToInitial(HorizontalCalendarProvider provider) {
-    if (_hasScrolled || !widget.autoScroll) return;
+    if (_hasScrolled || !widget.autoScroll || !_scrollController.hasClients) {
+      return;
+    }
     final initial = widget.initialDate;
     if (initial == null) return;
 
@@ -188,10 +207,11 @@ class _HorizontalViewState extends State<HorizontalView> {
           d.day == initial.day,
     );
     if (idx != -1) {
-      // each item is 60 wide plus 8 margin (4 each side)
       const itemExtent = 68.0;
-      final offset = idx * itemExtent - 120.0;
-      // animated scroll for a bit of polish
+      final offset = (idx * itemExtent - 120.0).clamp(
+        0.0,
+        _scrollController.position.maxScrollExtent,
+      );
       _scrollController.animateTo(
         offset,
         duration: const Duration(milliseconds: 300),
@@ -205,7 +225,6 @@ class _HorizontalViewState extends State<HorizontalView> {
   Widget build(BuildContext context) {
     return Consumer<HorizontalCalendarProvider>(
       builder: (context, provider, _) {
-        // attempt scrolling after provider has been built
         WidgetsBinding.instance.addPostFrameCallback((_) {
           _maybeScrollToInitial(provider);
         });
@@ -213,26 +232,20 @@ class _HorizontalViewState extends State<HorizontalView> {
         return Column(
           children: [
             if (widget.showMonthYearPicker)
-              ChangeNotifierProvider(
-                create: (BuildContext context) {
-                  return CalendarHeaderProvider(provider.selectedMonth);
+              CalendarHeaderView(
+                displayedMonth: provider.selectedMonth,
+                onMonthChanged: (value) {
+                  provider.setSelectedMonth(value);
                 },
-                child: CalendarHeaderView(
-                  onMonthChanged: (value) {
-                    provider.setSelectedMonth(value);
-                  },
-                  textStyle: widget.headerTextStyle,
-                  iconColor: widget.headerIconColor,
-                  height: widget.headerHeight ?? 320,
-                  selectedMonthColor: widget.monthYearPickerSelectedMonthColor,
-                  unselectedMonthColor:
-                      widget.monthYearPickerUnselectedMonthColor,
-                  crossAxisCount: widget.monthYearPickerCrossAxisCount ?? 3,
-                  childAspectRatio:
-                      widget.monthYearPickerChildAspectRatio ?? 1.5,
-                  monthItemDecoration:
-                      widget.monthYearPickerMonthItemDecoration,
-                ),
+                textStyle: widget.headerTextStyle,
+                iconColor: widget.headerIconColor,
+                height: widget.headerHeight ?? 320,
+                selectedMonthColor: widget.monthYearPickerSelectedMonthColor,
+                unselectedMonthColor:
+                    widget.monthYearPickerUnselectedMonthColor,
+                crossAxisCount: widget.monthYearPickerCrossAxisCount ?? 3,
+                childAspectRatio: widget.monthYearPickerChildAspectRatio ?? 1.5,
+                monthItemDecoration: widget.monthYearPickerMonthItemDecoration,
               ),
             Expanded(
               child: ListView(
@@ -248,115 +261,118 @@ class _HorizontalViewState extends State<HorizontalView> {
 
                       final markedModel = provider.markedModelFor(date);
 
-                      // Compare dates without time-of-day to avoid
-                      // DateTime.now() / time-component edge cases.
-                      final now = DateTime.now();
-                      final startDay =
-                          widget.initialDate != null
-                              ? _dateOnly(
-                                widget.initialDate!,
-                              ).subtract(const Duration(days: 1))
-                              : _dateOnly(
-                                now,
-                              ).subtract(const Duration(days: 1));
-                      final endDay =
-                          widget.endDate != null
-                              ? _dateOnly(widget.endDate!)
-                              : _dateOnly(now).add(const Duration(days: 30));
-                      final bool isSelectable =
-                          !_dateOnly(date).isBefore(startDay) &&
-                          !_dateOnly(date).isAfter(endDay);
+                      final isAfterStart =
+                          widget.initialDate == null ||
+                          !_dateOnly(
+                            date,
+                          ).isBefore(_dateOnly(widget.initialDate!));
+                      final isBeforeEnd =
+                          widget.endDate == null ||
+                          !_dateOnly(date).isAfter(_dateOnly(widget.endDate!));
+                      final bool isSelectable = isAfterStart && isBeforeEnd;
 
-                      return GestureDetector(
-                        onTap:
-                            isSelectable
-                                ? () => provider.setSelectedDay(date)
-                                : null,
-                        child: Container(
-                          width: 60,
-                          height: 60,
-                          margin: const EdgeInsets.all(4),
-                          decoration:
-                              isSelected
-                                  ? widget.userPickedDecoration ??
-                                      BoxDecoration(
-                                        color: Colors.blue,
-                                        borderRadius: BorderRadius.circular(10),
-                                      )
-                                  : markedModel != null
-                                  ? markedModel.decoration
-                                  : widget.decoration ??
-                                      BoxDecoration(
-                                        border: Border.all(color: Colors.grey),
-                                        borderRadius: BorderRadius.circular(10),
-                                      ),
-                          alignment: Alignment.center,
-                          child:
-                              isSelected
-                                  ? Column(
-                                    mainAxisAlignment: MainAxisAlignment.center,
-                                    children: [
-                                      widget.userPickedChild ??
+                      return Semantics(
+                        button: isSelectable,
+                        enabled: isSelectable,
+                        selected: isSelected,
+                        label: date.toString().split(' ').first,
+                        child: GestureDetector(
+                          onTap:
+                              isSelectable
+                                  ? () => provider.setSelectedDay(date)
+                                  : null,
+                          child: Container(
+                            width: 60,
+                            height: 60,
+                            margin: const EdgeInsets.all(4),
+                            decoration:
+                                isSelected
+                                    ? widget.userPickedDecoration ??
+                                        BoxDecoration(
+                                          color: Colors.blue,
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        )
+                                    : markedModel != null
+                                    ? markedModel.decoration
+                                    : widget.decoration ??
+                                        BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.grey,
+                                          ),
+                                          borderRadius: BorderRadius.circular(
+                                            10,
+                                          ),
+                                        ),
+                            alignment: Alignment.center,
+                            child:
+                                isSelected
+                                    ? Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        widget.userPickedChild ??
+                                            Text(
+                                              '${date.day}',
+                                              style:
+                                                  widget
+                                                      .selectedDateTextStyle ??
+                                                  const TextStyle(
+                                                    color: Colors.white,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                            ),
+                                        if (widget.showWeekDays)
                                           Text(
-                                            '${date.day}',
+                                            DateFormat('E').format(date),
                                             style:
-                                                widget.selectedDateTextStyle ??
+                                                widget
+                                                    .selectedWeekDaysTextStyle ??
                                                 const TextStyle(
                                                   color: Colors.white,
-
-                                                  fontSize: 16,
-                                                ),
-                                          ),
-                                      const SizedBox(height: 4),
-                                      Text(
-                                        DateFormat('EEE').format(date),
-                                        style:
-                                            widget.selectedWeekDaysTextStyle ??
-                                            const TextStyle(
-                                              color: Colors.white,
-                                              fontSize: 12,
-                                            ),
-                                      ),
-                                    ],
-                                  )
-                                  : widget.defaultChild ??
-                                      Column(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(
-                                            '${date.day}',
-                                            style:
-                                                widget.dateTextStyle ??
-                                                TextStyle(
-                                                  color: Colors.black
-                                                      .withValues(
-                                                        alpha:
-                                                            isSelectable
-                                                                ? 1
-                                                                : 0.5,
-                                                      ),
-                                                  fontSize: 16,
-                                                ),
-                                          ),
-                                          const SizedBox(height: 4),
-                                          Text(
-                                            DateFormat('EEE').format(date),
-                                            style:
-                                                widget.weekDaysTextStyle ??
-                                                TextStyle(
-                                                  color: Colors.black
-                                                      .withValues(
-                                                        alpha:
-                                                            isSelectable
-                                                                ? 1
-                                                                : 0.5,
-                                                      ),
                                                   fontSize: 12,
                                                 ),
                                           ),
-                                        ],
-                                      ),
+                                      ],
+                                    )
+                                    : Column(
+                                      mainAxisAlignment:
+                                          MainAxisAlignment.center,
+                                      children: [
+                                        widget.defaultChild ??
+                                            Text(
+                                              '${date.day}',
+                                              style:
+                                                  widget.dateTextStyle ??
+                                                  TextStyle(
+                                                    color:
+                                                        isSelectable
+                                                            ? Colors.black
+                                                            : Colors.grey,
+                                                    fontWeight: FontWeight.bold,
+                                                    fontSize: 16,
+                                                  ),
+                                            ),
+                                        if (widget.showWeekDays)
+                                          Text(
+                                            DateFormat('E').format(date),
+                                            style:
+                                                widget.weekDaysTextStyle ??
+                                                TextStyle(
+                                                  color:
+                                                      isSelectable
+                                                          ? Colors.grey
+                                                          : Colors
+                                                              .grey
+                                                              .shade400,
+                                                  fontSize: 12,
+                                                ),
+                                          ),
+                                      ],
+                                    ),
+                          ),
                         ),
                       );
                     }).toList(),
