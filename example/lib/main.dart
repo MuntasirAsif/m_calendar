@@ -122,6 +122,17 @@ class _CalendarDemoPageState extends State<CalendarDemoPage> {
             const SizedBox(height: 24),
 
             // ────────────────────────────────────────────────────────────
+            // Section: Monthly – opt-in animations
+            // ────────────────────────────────────────────────────────────
+            _sectionLabel('Monthly — opt-in animations'),
+            MCalendar(
+              selectedMonth: DateTime.now(),
+              animations: const CalendarAnimations(),
+              onUserPicked: (dates) => _show('Monthly animated: $dates'),
+            ),
+            const SizedBox(height: 24),
+
+            // ────────────────────────────────────────────────────────────
             // Last-picked display
             // ────────────────────────────────────────────────────────────
             Container(

@@ -18,6 +18,8 @@ class WeeklyCalendarDateCell extends StatelessWidget {
     this.userPickedChild,
     this.cellPadding,
     required this.lastDate,
+    this.animationDuration = Duration.zero,
+    this.animationCurve = Curves.easeOut,
   });
 
   /// The first date of the week (used to display the start day).
@@ -46,6 +48,14 @@ class WeeklyCalendarDateCell extends StatelessWidget {
 
   /// The padding applied around the content inside the cell.
   final EdgeInsets? cellPadding;
+
+  /// Duration used to animate this cell's decoration between states.
+  ///
+  /// [Duration.zero] (the default) keeps updates instant.
+  final Duration animationDuration;
+
+  /// Curve applied to this cell's decoration animation.
+  final Curve animationCurve;
 
   @override
   Widget build(BuildContext context) {
@@ -77,14 +87,25 @@ class WeeklyCalendarDateCell extends StatelessWidget {
                   '${firstDate.day}-${lastDate.day}',
                 ); // Display default date range
 
-    return GestureDetector(
-      onTap: isBlank ? null : onTap, // Disable tap if the cell is blank
-      child: Container(
-        padding:
-            cellPadding ??
-            const EdgeInsets.all(6), // Padding for content inside the cell
-        decoration: decoration,
-        child: Center(child: child), // Center the content inside the cell
+    return Semantics(
+      button: !isBlank,
+      enabled: !isBlank,
+      selected: isSelected,
+      label:
+          isBlank
+              ? ''
+              : '${firstDate.month}/${firstDate.day} to ${lastDate.month}/${lastDate.day}',
+      child: GestureDetector(
+        onTap: isBlank ? null : onTap, // Disable tap if the cell is blank
+        child: AnimatedContainer(
+          duration: animationDuration,
+          curve: animationCurve,
+          padding:
+              cellPadding ??
+              const EdgeInsets.all(6), // Padding for content inside the cell
+          decoration: decoration,
+          child: Center(child: child), // Center the content inside the cell
+        ),
       ),
     );
   }
