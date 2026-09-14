@@ -204,6 +204,44 @@ MCalendar(
 )
 ```
 
+### Animations (opt-in)
+
+Animations are **off by default** to keep existing behavior unchanged. Pass a
+[`CalendarAnimations`] configuration to any calendar to enable them:
+
+```dart
+MCalendar(
+  selectedMonth: DateTime.now(),
+  animations: const CalendarAnimations(), // opt in
+  onUserPicked: (dates) => print(dates),
+)
+```
+
+This animates:
+- selection / range highlight changes on monthly, weekly, and horizontal cells,
+  plus the month-picker tiles,
+- a fade + directional slide when the displayed month changes,
+- a smooth grid resize between months with different row counts.
+
+Tune the timings and curves, or disable specific parts:
+
+```dart
+const CalendarAnimations(
+  selectionDuration: Duration(milliseconds: 150),
+  monthTransitionDuration: Duration(milliseconds: 250),
+  sizeDuration: Duration.zero, // keep the height change instant
+)
+
+MCalendar(
+  selectedMonth: DateTime.now(),
+  animations: CalendarAnimations.none, // explicitly disable
+  onUserPicked: (dates) => print(dates),
+)
+```
+
+> Animations automatically become instant when the platform requests reduced
+> motion (`MediaQueryData.disableAnimations`).
+
 ---
 
 ### Weekly calendar
@@ -349,6 +387,7 @@ MCalendar.horizontal(
 | `disabledDecoration` | `BoxDecoration?` | `null` | Decoration for disabled day cells. |
 | `disabledTextStyle` | `TextStyle?` | `null` | Text style for disabled day cell numbers. |
 | `startDay` | `Day` | `Day.saturday` | First day of the week; changes cell alignment and header labels. |
+| `animations` | `CalendarAnimations?` | `null` | Opt-in animation config; `null` = instant updates. |
 
 ### `MCalendar.weekly`
 
@@ -379,6 +418,7 @@ Same as above **plus**:
 | `weekDaysTextStyle` | `TextStyle?` | `null` | Style for the weekday label. |
 | `selectedDateTextStyle` | `TextStyle?` | `null` | Day number style when selected. |
 | `selectedWeekDaysTextStyle` | `TextStyle?` | `null` | Weekday label style when selected. |
+| `animations` | `CalendarAnimations?` | `null` | Opt-in animation config; `null` = instant updates. |
 
 ### `MarkedDaysModel`
 
@@ -398,6 +438,19 @@ Used for `MCalendar.weekly(startDay: ...)`:
 Day.monday  Day.tuesday  Day.wednesday  Day.thursday
 Day.friday  Day.saturday  Day.sunday
 ```
+
+### `CalendarAnimations`
+
+| Field | Default | Description |
+|-------|---------|-------------|
+| `selectionDuration` | `180ms` | Duration of selection/range highlight transitions. |
+| `selectionCurve` | `Curves.easeOut` | Curve for selection transitions. |
+| `monthTransitionDuration` | `250ms` | Duration of the month-change fade + slide. |
+| `monthTransitionCurve` | `Curves.easeOutCubic` | Curve for the month-change transition. |
+| `sizeDuration` | `200ms` | Duration of grid resizes between row counts. |
+
+`CalendarAnimations.none` disables all of them. Any duration is forced to
+`Duration.zero` when the platform requests reduced motion.
 
 ---
 

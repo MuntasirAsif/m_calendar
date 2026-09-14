@@ -18,6 +18,8 @@ class WeeklyCalendarDateCell extends StatelessWidget {
     this.userPickedChild,
     this.cellPadding,
     required this.lastDate,
+    this.animationDuration = Duration.zero,
+    this.animationCurve = Curves.easeOut,
   });
 
   /// The first date of the week (used to display the start day).
@@ -46,6 +48,14 @@ class WeeklyCalendarDateCell extends StatelessWidget {
 
   /// The padding applied around the content inside the cell.
   final EdgeInsets? cellPadding;
+
+  /// Duration used to animate this cell's decoration between states.
+  ///
+  /// [Duration.zero] (the default) keeps updates instant.
+  final Duration animationDuration;
+
+  /// Curve applied to this cell's decoration animation.
+  final Curve animationCurve;
 
   @override
   Widget build(BuildContext context) {
@@ -87,7 +97,9 @@ class WeeklyCalendarDateCell extends StatelessWidget {
               : '${firstDate.month}/${firstDate.day} to ${lastDate.month}/${lastDate.day}',
       child: GestureDetector(
         onTap: isBlank ? null : onTap, // Disable tap if the cell is blank
-        child: Container(
+        child: AnimatedContainer(
+          duration: animationDuration,
+          curve: animationCurve,
           padding:
               cellPadding ??
               const EdgeInsets.all(6), // Padding for content inside the cell

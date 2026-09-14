@@ -3,7 +3,9 @@ import 'package:m_calendar/provider/weekly_calendar_table_provider.dart';
 import 'package:m_calendar/widgets/calendar_week_cell.dart';
 import 'package:provider/provider.dart';
 import '../controller/m_calendar_controller.dart';
+import '../model/calendar_animations.dart';
 import '../model/marked_date_model.dart';
+import '../widgets/animated_month_grid.dart';
 
 /// A widget that displays the weekly calendar view, showing weeks of a month
 /// with the ability to select individual dates.
@@ -31,6 +33,7 @@ class WeeklyView extends StatefulWidget {
     this.isRangeSelection = false,
     required this.startDay,
     this.controller,
+    this.animations,
   });
 
   /// The currently selected month for the calendar.
@@ -68,6 +71,10 @@ class WeeklyView extends StatefulWidget {
 
   /// Optional controller to programmatically drive calendar navigation and selections.
   final MCalendarController? controller;
+
+  /// Optional animation configuration. When `null` (the default) every update
+  /// is instant.
+  final CalendarAnimations? animations;
 
   @override
   State<WeeklyView> createState() => _WeeklyViewState();
@@ -119,12 +126,28 @@ class _WeeklyViewState extends State<WeeklyView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<WeeklyCalendarTableProvider>(
-      builder: (_, provider, __) {
+      builder: (context, provider, __) {
         final monthWeekMap = provider.monthWeekMap;
         final months = monthWeekMap.keys.toList();
         final weekCount = provider.maxWeekCount;
+        final selectionDuration = CalendarAnimations.selectionOf(
+          context,
+          widget.animations,
+        );
+        final selectionCurve =
+            widget.animations?.selectionCurve ?? Curves.easeOut;
+        final monthDuration = CalendarAnimations.monthTransitionOf(
+          context,
+          widget.animations,
+        );
+        final monthCurve =
+            widget.animations?.monthTransitionCurve ?? Curves.easeOutCubic;
+        final sizeDuration = CalendarAnimations.sizeOf(
+          context,
+          widget.animations,
+        );
 
-        return Table(
+        final grid = Table(
           columnWidths: const {
             0: FixedColumnWidth(60), // Fixed width for month labels
           },
@@ -195,6 +218,8 @@ class _WeeklyViewState extends State<WeeklyView> {
                         userPickedDecoration: widget.userPickedDecoration,
                         userPickedChild: widget.userPickedChild,
                         cellPadding: widget.cellPadding,
+                        animationDuration: selectionDuration,
+                        animationCurve: selectionCurve,
                       );
                     } else {
                       // Blank placeholder cell
@@ -208,6 +233,14 @@ class _WeeklyViewState extends State<WeeklyView> {
                 ],
               ),
           ],
+        );
+
+        return AnimatedMonthGrid(
+          month: provider.selectedMonth,
+          duration: monthDuration,
+          curve: monthCurve,
+          sizeDuration: sizeDuration,
+          child: grid,
         );
       },
     );

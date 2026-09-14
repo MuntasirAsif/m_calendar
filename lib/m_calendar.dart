@@ -8,10 +8,12 @@ import 'package:m_calendar/view/weekly_view.dart';
 import 'package:provider/provider.dart';
 
 import 'controller/m_calendar_controller.dart';
+import 'model/calendar_animations.dart';
 import 'model/day_state.dart';
 import 'model/marked_date_model.dart';
 
 export 'controller/m_calendar_controller.dart' show MCalendarController;
+export 'model/calendar_animations.dart' show CalendarAnimations;
 export 'model/day_state.dart' show CalendarDayBuilder, DayState;
 export 'model/marked_date_model.dart' show MarkedDaysModel;
 export 'provider/weekly_calendar_table_provider.dart' show Day;
@@ -63,6 +65,7 @@ class MCalendar extends StatelessWidget {
     BoxDecoration? disabledDecoration,
     TextStyle? disabledTextStyle,
     Day startDay = Day.saturday,
+    CalendarAnimations? animations,
   }) => MCalendar.monthly(
     selectedMonth: selectedMonth,
     decoration: decoration,
@@ -83,6 +86,7 @@ class MCalendar extends StatelessWidget {
     disabledDecoration: disabledDecoration,
     disabledTextStyle: disabledTextStyle,
     startDay: startDay,
+    animations: animations,
   );
 
   const MCalendar._({required this.child});
@@ -112,6 +116,7 @@ class MCalendar extends StatelessWidget {
     BoxDecoration? disabledDecoration,
     TextStyle? disabledTextStyle,
     Day startDay = Day.saturday,
+    CalendarAnimations? animations,
   }) {
     assert(
       minDate == null ||
@@ -153,6 +158,7 @@ class MCalendar extends StatelessWidget {
           disabledDecoration: disabledDecoration,
           disabledTextStyle: disabledTextStyle,
           startDay: startDay,
+          animations: animations,
         ),
       ),
     );
@@ -194,6 +200,7 @@ class MCalendar extends StatelessWidget {
     Day startDay = Day.saturday,
     required void Function(List<DateTime>) onUserPicked,
     MCalendarController? controller,
+    CalendarAnimations? animations,
   }) {
     final effectiveMonth = controller?.initialMonth ?? selectedMonth;
     return MCalendar._(
@@ -220,6 +227,7 @@ class MCalendar extends StatelessWidget {
           isRangeSelection: isRangeSelection,
           startDay: startDay,
           controller: controller,
+          animations: animations,
         ),
       ),
     );
@@ -252,6 +260,7 @@ class MCalendar extends StatelessWidget {
     DateTime? endDate,
     bool autoScroll = true,
     MCalendarController? controller,
+    CalendarAnimations? animations,
   }) {
     assert(
       initialDate == null ||
@@ -294,6 +303,7 @@ class MCalendar extends StatelessWidget {
           selectedMonth: effectiveMonth,
           onUserPicked: onUserPicked,
           controller: controller,
+          animations: animations,
         ),
       ),
     );

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import '../model/calendar_animations.dart';
 import '../provider/calendar_header_provider.dart';
 
 /// Widget that displays the calendar header, allowing users to navigate between months.
@@ -31,6 +32,7 @@ class CalendarHeaderView extends StatelessWidget {
     this.height = 320,
     this.crossAxisCount = 3,
     this.childAspectRatio = 2.5,
+    this.animations,
   });
 
   /// Callback when month changes
@@ -62,6 +64,10 @@ class CalendarHeaderView extends StatelessWidget {
 
   /// Aspect ratio for month grid items
   final double childAspectRatio;
+
+  /// Optional animation configuration for the picker's year label and month
+  /// tiles. When `null` (the default) updates are instant.
+  final CalendarAnimations? animations;
 
   @override
   Widget build(BuildContext context) {
@@ -123,6 +129,12 @@ class CalendarHeaderView extends StatelessWidget {
       builder: (_) {
         return StatefulBuilder(
           builder: (context, setState) {
+            final selectionDuration = CalendarAnimations.selectionOf(
+              context,
+              animations,
+            );
+            final selectionCurve = animations?.selectionCurve ?? Curves.easeOut;
+
             return SizedBox(
               height: height,
               child: Column(
@@ -136,14 +148,18 @@ class CalendarHeaderView extends StatelessWidget {
                         onPressed: () => setState(() => tempYear--),
                         icon: Icon(Icons.chevron_left, color: iconColor),
                       ),
-                      Text(
-                        '$tempYear',
-                        style:
-                            textStyle ??
-                            const TextStyle(
-                              fontSize: 18,
-                              fontWeight: FontWeight.bold,
-                            ),
+                      AnimatedSwitcher(
+                        duration: selectionDuration,
+                        child: Text(
+                          '$tempYear',
+                          key: ValueKey<int>(tempYear),
+                          style:
+                              textStyle ??
+                              const TextStyle(
+                                fontSize: 18,
+                                fontWeight: FontWeight.bold,
+                              ),
+                        ),
                       ),
                       IconButton(
                         tooltip: 'Next year',
@@ -178,7 +194,9 @@ class CalendarHeaderView extends StatelessWidget {
                             onMonthChanged(picked);
                             Navigator.pop(context);
                           },
-                          child: Container(
+                          child: AnimatedContainer(
+                            duration: selectionDuration,
+                            curve: selectionCurve,
                             margin: const EdgeInsets.all(6),
                             alignment: Alignment.center,
                             decoration:

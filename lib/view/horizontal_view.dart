@@ -5,6 +5,7 @@ import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/m_calendar_controller.dart';
+import '../model/calendar_animations.dart';
 
 /// Horizontal scrolling calendar view.
 ///
@@ -23,6 +24,7 @@ class HorizontalView extends StatefulWidget {
     DateTime? initialDate,
     DateTime? endDate,
     MCalendarController? controller,
+    CalendarAnimations? animations,
   }) {
     return HorizontalView(
       selectedMonth: selectedMonth,
@@ -35,6 +37,7 @@ class HorizontalView extends StatefulWidget {
       initialDate: initialDate,
       endDate: endDate,
       controller: controller,
+      animations: animations,
     );
   }
 
@@ -67,6 +70,7 @@ class HorizontalView extends StatefulWidget {
     this.initialDate,
     this.autoScroll = true,
     this.controller,
+    this.animations,
     required this.selectedMonth,
     required this.onUserPicked,
   });
@@ -142,6 +146,10 @@ class HorizontalView extends StatefulWidget {
 
   /// Optional controller to programmatically drive calendar navigation and selections.
   final MCalendarController? controller;
+
+  /// Optional animation configuration. When `null` (the default) every update
+  /// is instant.
+  final CalendarAnimations? animations;
 
   @override
   State<HorizontalView> createState() => _HorizontalViewState();
@@ -229,11 +237,19 @@ class _HorizontalViewState extends State<HorizontalView> {
           _maybeScrollToInitial(provider);
         });
 
+        final selectionDuration = CalendarAnimations.selectionOf(
+          context,
+          widget.animations,
+        );
+        final selectionCurve =
+            widget.animations?.selectionCurve ?? Curves.easeOut;
+
         return Column(
           children: [
             if (widget.showMonthYearPicker)
               CalendarHeaderView(
                 displayedMonth: provider.selectedMonth,
+                animations: widget.animations,
                 onMonthChanged: (value) {
                   provider.setSelectedMonth(value);
                 },
@@ -281,7 +297,9 @@ class _HorizontalViewState extends State<HorizontalView> {
                               isSelectable
                                   ? () => provider.setSelectedDay(date)
                                   : null,
-                          child: Container(
+                          child: AnimatedContainer(
+                            duration: selectionDuration,
+                            curve: selectionCurve,
                             width: 60,
                             height: 60,
                             margin: const EdgeInsets.all(4),

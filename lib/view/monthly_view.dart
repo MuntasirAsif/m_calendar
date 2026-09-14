@@ -3,10 +3,12 @@ import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
 import '../controller/m_calendar_controller.dart';
+import '../model/calendar_animations.dart';
 import '../model/day_state.dart';
 import '../model/marked_date_model.dart';
 import '../provider/monthly_calender_table_provider.dart';
 import '../provider/weekly_calendar_table_provider.dart' show Day;
+import '../widgets/animated_month_grid.dart';
 import '../widgets/calendar_date_cell.dart';
 
 /// A widget that displays the monthly calendar view, showing the days of a month
@@ -37,6 +39,7 @@ class MonthlyView extends StatefulWidget {
     this.disabledDecoration,
     this.disabledTextStyle,
     this.startDay = Day.saturday,
+    this.animations,
   });
 
   /// The currently selected month for the calendar.
@@ -92,6 +95,10 @@ class MonthlyView extends StatefulWidget {
 
   /// Starting day of the week for column ordering. Defaults to [Day.saturday].
   final Day startDay;
+
+  /// Optional animation configuration. When `null` (the default) every update
+  /// is instant.
+  final CalendarAnimations? animations;
 
   @override
   State<MonthlyView> createState() => _MonthlyViewState();
@@ -164,12 +171,61 @@ class _MonthlyViewState extends State<MonthlyView> {
   @override
   Widget build(BuildContext context) {
     return Consumer<MonthlyCalendarTableProvider>(
-      builder: (_, provider, __) {
+      builder: (context, provider, __) {
+        final selectionDuration = CalendarAnimations.selectionOf(
+          context,
+          widget.animations,
+        );
+        final selectionCurve =
+            widget.animations?.selectionCurve ?? Curves.easeOut;
+        final monthDuration = CalendarAnimations.monthTransitionOf(
+          context,
+          widget.animations,
+        );
+        final monthCurve =
+            widget.animations?.monthTransitionCurve ?? Curves.easeOutCubic;
+        final sizeDuration = CalendarAnimations.sizeOf(
+          context,
+          widget.animations,
+        );
+
+        final grid = Table(
+          children: [
+            // Week header row (e.g., "Sat", "Sun", "Mon", etc.)
+            TableRow(
+              children:
+                  provider.weekNameList.map((name) {
+                    return Center(
+                      child: Padding(
+                        padding: const EdgeInsets.symmetric(vertical: 8),
+                        child: Text(
+                          name,
+                          style:
+                              widget.weekNameHeaderStyle ??
+                              const TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 14,
+                              ),
+                        ),
+                      ),
+                    );
+                  }).toList(),
+            ),
+            // Rows representing the days of the month
+            ..._generateCalendarRows(
+              provider,
+              selectionDuration,
+              selectionCurve,
+            ),
+          ],
+        );
+
         return Column(
           children: [
             if (widget.showMonthYearPicker)
               CalendarHeaderView(
                 displayedMonth: provider.selectedMonth,
+                animations: widget.animations,
                 onMonthChanged: (value) {
                   provider.initializeMonth(
                     value,
@@ -183,31 +239,12 @@ class _MonthlyViewState extends State<MonthlyView> {
                   );
                 },
               ),
-            Table(
-              children: [
-                // Week header row (e.g., "Sat", "Sun", "Mon", etc.)
-                TableRow(
-                  children:
-                      provider.weekNameList.map((name) {
-                        return Center(
-                          child: Padding(
-                            padding: const EdgeInsets.symmetric(vertical: 8),
-                            child: Text(
-                              name,
-                              style:
-                                  widget.weekNameHeaderStyle ??
-                                  const TextStyle(
-                                    fontWeight: FontWeight.bold,
-                                    fontSize: 14,
-                                  ),
-                            ),
-                          ),
-                        );
-                      }).toList(),
-                ),
-                // Rows representing the days of the month
-                ..._generateCalendarRows(provider),
-              ],
+            AnimatedMonthGrid(
+              month: provider.selectedMonth,
+              duration: monthDuration,
+              curve: monthCurve,
+              sizeDuration: sizeDuration,
+              child: grid,
             ),
           ],
         );
@@ -216,7 +253,11 @@ class _MonthlyViewState extends State<MonthlyView> {
   }
 
   /// Generates rows for the calendar, breaking the days of the month into weeks.
-  List<TableRow> _generateCalendarRows(MonthlyCalendarTableProvider provider) {
+  List<TableRow> _generateCalendarRows(
+    MonthlyCalendarTableProvider provider,
+    Duration animationDuration,
+    Curve animationCurve,
+  ) {
     final List<Widget> dayCells = [];
 
     // Fill empty days before the first of the month
@@ -237,6 +278,8 @@ class _MonthlyViewState extends State<MonthlyView> {
           dayBuilder: widget.dayBuilder,
           disabledDecoration: widget.disabledDecoration,
           disabledTextStyle: widget.disabledTextStyle,
+          animationDuration: animationDuration,
+          animationCurve: animationCurve,
         ),
       );
     }

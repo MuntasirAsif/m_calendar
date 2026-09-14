@@ -34,7 +34,7 @@ void main() {
   ) async {
     await _pumpDemo(tester);
 
-    expect(find.byType(MCalendar), findsNWidgets(4));
+    expect(find.byType(MCalendar), findsNWidgets(5));
     expect(
       find.text('Monthly — single selection + marked dates'),
       findsOneWidget,
@@ -45,6 +45,7 @@ void main() {
       find.text('Horizontal — auto-scroll to today, marked dates'),
       findsOneWidget,
     );
+    expect(find.text('Monthly — opt-in animations'), findsOneWidget);
     expect(find.text('Nothing picked yet'), findsOneWidget);
   });
 
@@ -127,6 +128,19 @@ void main() {
     await tester.pumpAndSettle();
 
     final expected = 'Horizontal: ${DateTime(now.year, now.month, now.day)}';
+    expect(find.text(expected), findsOneWidget);
+  });
+
+  testWidgets('animated monthly demo picks a date and reports it', (
+    WidgetTester tester,
+  ) async {
+    await _pumpDemo(tester);
+    final now = DateTime.now();
+
+    await tester.tap(_day(4, '8'));
+    await tester.pumpAndSettle();
+
+    final expected = 'Monthly animated: [${DateTime(now.year, now.month, 8)}]';
     expect(find.text(expected), findsOneWidget);
   });
 

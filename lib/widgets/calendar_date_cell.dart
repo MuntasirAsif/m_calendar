@@ -30,6 +30,8 @@ class CalendarDateCell extends StatelessWidget {
     this.dayBuilder,
     this.disabledDecoration,
     this.disabledTextStyle,
+    this.animationDuration = Duration.zero,
+    this.animationCurve = Curves.easeOut,
   });
 
   /// The day of the month represented by this cell (1-based index).
@@ -61,6 +63,14 @@ class CalendarDateCell extends StatelessWidget {
 
   /// Custom text style applied to the day number when disabled.
   final TextStyle? disabledTextStyle;
+
+  /// Duration used to animate this cell's decoration between states.
+  ///
+  /// [Duration.zero] (the default) keeps updates instant.
+  final Duration animationDuration;
+
+  /// Curve applied to this cell's decoration animation.
+  final Curve animationCurve;
 
   @override
   Widget build(BuildContext context) {
@@ -194,7 +204,9 @@ class CalendarDateCell extends StatelessWidget {
       label: currentDate.toString().split(' ').first,
       child: GestureDetector(
         onTap: isDisabled ? null : () => provider.toggleUserPicked(i),
-        child: Container(
+        child: AnimatedContainer(
+          duration: animationDuration,
+          curve: animationCurve,
           padding: finalPadding,
           margin: finalMargin,
           decoration: finalDecoration,
