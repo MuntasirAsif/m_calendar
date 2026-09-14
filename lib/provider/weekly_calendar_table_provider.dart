@@ -27,7 +27,7 @@ enum Day {
 
 /// A provider that handles weekly calendar logic, including month initialization,
 /// range selection, and week generation.
-class WeeklyCalenderTableProvider extends ChangeNotifier {
+class WeeklyCalendarTableProvider extends ChangeNotifier {
   /// The currently selected month.
   late DateTime _selectedMonth;
 
@@ -52,6 +52,12 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
   /// Callback function that is invoked when the user picks a date.
   void Function(List<DateTime>)? _onUserPickedCallback;
 
+  /// Cached weeks-per-month map, recomputed on [initializeMonth].
+  Map<String, List<List<DateTime>>> _monthWeekMap = {};
+
+  /// The maximum number of week rows any displayed month needs (5 or 6).
+  int _maxWeekCount = 5;
+
   /// Getter for the selected month.
   DateTime get selectedMonth => _selectedMonth;
 
@@ -65,7 +71,13 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
   DateTime? get userPicked => _userPicked;
 
   /// A map representing weeks for each month, where each week starts from the selected start day.
-  Map<String, List<List<DateTime>>> get monthWeekMap => _generateWeeksByMonth();
+  Map<String, List<List<DateTime>>> get monthWeekMap => _monthWeekMap;
+
+  /// The maximum number of week rows needed by any displayed month.
+  ///
+  /// Most months fit in 5 rows, but depending on [startedDay] some months
+  /// require 6. Use this to build a consistent number of columns.
+  int get maxWeekCount => _maxWeekCount;
 
   /// Initializes the month and other settings for the calendar.
   ///
@@ -78,18 +90,20 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
     bool isRange, {
     void Function(List<DateTime>)? onUserPicked,
   }) {
-    _selectedMonth = selectedMonth;
-    final firstDay = DateTime(selectedMonth.year, selectedMonth.month, 1);
+    // Normalize: only year and month are relevant for a month view.
+    _selectedMonth = DateTime(selectedMonth.year, selectedMonth.month);
+    final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month);
     startedDay = startDay;
     _startOffset = (firstDay.weekday % 7);
     _totalDays = DateUtils.getDaysInMonth(
-      selectedMonth.year,
-      selectedMonth.month,
+      _selectedMonth.year,
+      _selectedMonth.month,
     );
     isRangeSelection = isRange;
     _onUserPickedCallback = onUserPicked;
     selectedDaysList = customList ?? [];
     _userPicked = null;
+    _monthWeekMap = _generateWeeksByMonth();
     notifyListeners();
   }
 
@@ -99,7 +113,6 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
   /// It also calls the callback with the picked date to notify listeners of the change.
   void toggleUserPicked(DateTime date) {
     _userPicked = date;
-    debugPrint('Picked date: ${date.toString()}');
 
     // If the callback exists, call it with the picked date wrapped in a List
     if (_onUserPickedCallback != null) {
@@ -109,10 +122,8 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Generates weeks for the selected month based on the starting day of the week.
-  ///
-  /// The calendar layout considers that the week starts from the `startedDay` and ends on the last day.
-  /// It supports weeks with up to 5 rows, filling empty weeks if necessary.
+  /// Generates weeks for the selected month (and the 5 preceding months)
+  /// based on the configured [startedDay].
   Map<String, List<List<DateTime>>> _generateWeeksByMonth() {
     final Map<String, List<List<DateTime>>> result = {};
 
@@ -121,64 +132,57 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
       final label = _monthName(current.month);
       final daysInMonth = DateUtils.getDaysInMonth(current.year, current.month);
 
-      List<List<DateTime>> weeks = [];
+      final List<List<DateTime>> weeks = [];
       List<DateTime> currentWeek = [];
 
       for (int i = 1; i <= daysInMonth; i++) {
         final day = DateTime(current.year, current.month, i);
         currentWeek.add(day);
 
-        // Add week when it's Friday or last date
+        // Close the week at the configured week end or at month end.
         if (day.weekday == _getWeekEnd() || i == daysInMonth) {
-          weeks.add(currentWeek);
+          weeks.add(List.of(currentWeek));
           currentWeek = [];
         }
       }
 
-      // 🟡 Fill blank week cells if weeks < 5
+      // Fill blank week cells if the month uses fewer than 5 rows.
       while (weeks.length < 5) {
-        weeks.add([]); // blank week
-      }
-
-      // 🛑 Strict: Never allow more than 5 weeks
-      if (weeks.length > 5) {
-        // if 6th week exists but has no real day, discard
-        if (weeks[5].isEmpty) {
-          weeks.removeLast();
-        } else {
-          // If accidentally went over due to a Friday being early,
-          // just merge extra into week 5 if needed or trim
-          weeks = weeks.sublist(0, 5);
-        }
+        weeks.add([]);
       }
 
       result[label] = weeks;
+    }
+
+    // Some months need a 6th row depending on the week start day.
+    _maxWeekCount = 5;
+    for (final weeks in result.values) {
+      if (weeks.length > _maxWeekCount) _maxWeekCount = weeks.length;
+    }
+
+    // Pad every month to the same row count so table rows stay aligned.
+    for (final entry in result.entries) {
+      while (entry.value.length < _maxWeekCount) {
+        entry.value.add([]);
+      }
     }
 
     return result;
   }
 
   /// Determines the end day of the week based on the selected start day.
-  ///
-  /// The end day is determined by the `startedDay`, which adjusts the week ending day accordingly.
   int _getWeekEnd() {
-    if (startedDay == Day.saturday) {
-      return DateTime.friday;
-    } else if (startedDay == Day.sunday) {
-      return DateTime.saturday;
-    } else if (startedDay == Day.monday) {
-      return DateTime.sunday;
-    } else if (startedDay == Day.tuesday) {
-      return DateTime.monday;
-    } else if (startedDay == Day.wednesday) {
-      return DateTime.tuesday;
-    } else if (startedDay == Day.thursday) {
-      return DateTime.wednesday;
-    } else if (startedDay == Day.friday) {
-      return DateTime.thursday;
-    } else {
-      return DateTime.friday;
-    }
+    final start = switch (startedDay) {
+      Day.monday => DateTime.monday,
+      Day.tuesday => DateTime.tuesday,
+      Day.wednesday => DateTime.wednesday,
+      Day.thursday => DateTime.thursday,
+      Day.friday => DateTime.friday,
+      Day.saturday => DateTime.saturday,
+      Day.sunday => DateTime.sunday,
+    };
+    // The week ends one day before it starts (wrapping 1..7).
+    return start == DateTime.sunday ? DateTime.saturday : start - 1;
   }
 
   /// Converts a numerical month value to its string abbreviation (e.g., 1 -> 'JAN').
@@ -219,3 +223,13 @@ class WeeklyCalenderTableProvider extends ChangeNotifier {
     return months.indexOf(label) + 1;
   }
 }
+
+/// Backward-compatible alias for the misspelled provider name.
+///
+/// Kept so existing code importing `WeeklyCalenderTableProvider` continues
+/// to compile. It will be removed in a future major release.
+@Deprecated(
+  'Use WeeklyCalendarTableProvider instead. '
+  'This alias will be removed in a future major release.',
+)
+typedef WeeklyCalenderTableProvider = WeeklyCalendarTableProvider;

@@ -57,7 +57,6 @@ class HorizontalView extends StatefulWidget {
       selectedWeekDaysTextStyle: selectedWeekDaysTextStyle,
       initialDate: DateTime.now(),
       endDate: DateTime.now(),
-      autoScroll: true,
     );
   }
 
@@ -166,6 +165,10 @@ class _HorizontalViewState extends State<HorizontalView> {
   final ScrollController _scrollController = ScrollController();
   bool _hasScrolled = false;
 
+  /// Returns a date-only copy of [date] (time components removed).
+  static DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
+
   @override
   void dispose() {
     _scrollController.dispose();
@@ -239,18 +242,30 @@ class _HorizontalViewState extends State<HorizontalView> {
                 children:
                     provider.daysInMonth.map((date) {
                       final isSelected =
-                          provider.selectedDay.day == date.day &&
-                          provider.selectedDay.month == date.month;
+                          provider.selectedDay.year == date.year &&
+                          provider.selectedDay.month == date.month &&
+                          provider.selectedDay.day == date.day;
 
-                      final isMarked = provider.isMarked(date);
-                      final start =
-                          widget.initialDate?.add(const Duration(days: -1)) ??
-                          DateTime.now().add(const Duration(days: -1));
-                      final end =
-                          widget.endDate ??
-                          DateTime.now().add(const Duration(days: 30));
-                      bool isSelectable =
-                          !date.isBefore(start) && !date.isAfter(end);
+                      final markedModel = provider.markedModelFor(date);
+
+                      // Compare dates without time-of-day to avoid
+                      // DateTime.now() / time-component edge cases.
+                      final now = DateTime.now();
+                      final startDay =
+                          widget.initialDate != null
+                              ? _dateOnly(
+                                widget.initialDate!,
+                              ).subtract(const Duration(days: 1))
+                              : _dateOnly(
+                                now,
+                              ).subtract(const Duration(days: 1));
+                      final endDay =
+                          widget.endDate != null
+                              ? _dateOnly(widget.endDate!)
+                              : _dateOnly(now).add(const Duration(days: 30));
+                      final bool isSelectable =
+                          !_dateOnly(date).isBefore(startDay) &&
+                          !_dateOnly(date).isAfter(endDay);
 
                       return GestureDetector(
                         onTap:
@@ -268,8 +283,8 @@ class _HorizontalViewState extends State<HorizontalView> {
                                         color: Colors.blue,
                                         borderRadius: BorderRadius.circular(10),
                                       )
-                                  : isMarked
-                                  ? provider.markedDaysList!.first.decoration
+                                  : markedModel != null
+                                  ? markedModel.decoration
                                   : widget.decoration ??
                                       BoxDecoration(
                                         border: Border.all(color: Colors.grey),
@@ -280,8 +295,6 @@ class _HorizontalViewState extends State<HorizontalView> {
                               isSelected
                                   ? Column(
                                     mainAxisAlignment: MainAxisAlignment.center,
-                                    crossAxisAlignment:
-                                        CrossAxisAlignment.center,
                                     children: [
                                       widget.userPickedChild ??
                                           Text(
@@ -310,8 +323,6 @@ class _HorizontalViewState extends State<HorizontalView> {
                                       Column(
                                         mainAxisAlignment:
                                             MainAxisAlignment.center,
-                                        crossAxisAlignment:
-                                            CrossAxisAlignment.center,
                                         children: [
                                           Text(
                                             '${date.day}',
