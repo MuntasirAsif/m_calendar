@@ -95,10 +95,11 @@ class _CalendarDemoPageState extends State<CalendarDemoPage> {
             // ────────────────────────────────────────────────────────────
             // Section: Weekly
             // ────────────────────────────────────────────────────────────
-            _sectionLabel('Weekly — start day: Sunday'),
+            _sectionLabel('Weekly — start day: Sunday, animated'),
             MCalendar.weekly(
               startDay: Day.sunday,
               selectedMonth: DateTime.now(),
+              animations: const CalendarAnimations(),
               onUserPicked: (dates) => _show('Weekly: $dates'),
             ),
             const SizedBox(height: 24),
@@ -106,7 +107,7 @@ class _CalendarDemoPageState extends State<CalendarDemoPage> {
             // ────────────────────────────────────────────────────────────
             // Section: Horizontal
             // ────────────────────────────────────────────────────────────
-            _sectionLabel('Horizontal — auto-scroll to today, marked dates'),
+            _sectionLabel('Horizontal — animated, auto-scroll to today'),
             SizedBox(
               width: double.maxFinite,
               height: 120,
@@ -115,6 +116,7 @@ class _CalendarDemoPageState extends State<CalendarDemoPage> {
                 initialDate: DateTime.now(),
                 endDate: DateTime.now().add(const Duration(days: 30)),
                 markedDaysList: _markedDates,
+                animations: const CalendarAnimations(),
                 showMonthYearPicker: true,
                 onUserPicked: (date) => _show('Horizontal: $date'),
               ),
@@ -123,11 +125,21 @@ class _CalendarDemoPageState extends State<CalendarDemoPage> {
 
             // ────────────────────────────────────────────────────────────
             // Section: Monthly – opt-in animations
+            //
+            // Exercises circle-shaped marked dates animating into a rounded
+            // selection, which is the combination that must not throw
+            // "A circle cannot have a border radius".
             // ────────────────────────────────────────────────────────────
-            _sectionLabel('Monthly — opt-in animations'),
+            _sectionLabel('Monthly — opt-in animations + marked dates'),
             MCalendar(
               selectedMonth: DateTime.now(),
               animations: const CalendarAnimations(),
+              markedDaysList: _markedDates,
+              userPickedDecoration: BoxDecoration(
+                color: Colors.indigo,
+                borderRadius: BorderRadius.circular(10),
+              ),
+              showMonthYearPicker: true,
               onUserPicked: (dates) => _show('Monthly animated: $dates'),
             ),
             const SizedBox(height: 24),
