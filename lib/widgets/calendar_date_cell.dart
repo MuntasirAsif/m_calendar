@@ -3,6 +3,7 @@ import 'package:provider/provider.dart';
 import '../model/day_state.dart';
 import '../model/marked_date_model.dart';
 import '../provider/monthly_calender_table_provider.dart';
+import '../utils/decoration_shape.dart';
 import '../utils/range_decoration.dart';
 
 /// A widget that represents a single selectable day cell in a calendar grid.
@@ -127,27 +128,40 @@ class CalendarDateCell extends StatelessWidget {
     final Widget? customContent = dayBuilder?.call(context, currentDate, state);
 
     BoxDecoration finalDecoration;
+    // The resting decoration fixes the shape of every transition so the
+    // AnimatedContainer never lerps between a circle and a rounded rectangle
+    // (which produces an invalid "circle + borderRadius" intermediate).
     if (isDisabled) {
       finalDecoration =
-          disabledDecoration ??
-          defaultDecoration ??
-          BoxDecoration(
-            color: Colors.transparent,
-            borderRadius: BorderRadius.circular(6),
-          );
+          withShapeOf(
+            selectedModel.decoration,
+            disabledDecoration ??
+                defaultDecoration ??
+                BoxDecoration(
+                  color: Colors.transparent,
+                  borderRadius: BorderRadius.circular(6),
+                ),
+          )!;
     } else if (isInRange) {
-      finalDecoration = getRangeDecoration(
-        context: context,
-        i: i,
-        rangeStart: provider.rangeStart,
-        rangeEnd: provider.rangeEnd,
-        defaultDecoration: defaultDecoration,
-        baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
-      );
+      finalDecoration =
+          withShapeOf(
+            selectedModel.decoration,
+            getRangeDecoration(
+              context: context,
+              i: i,
+              rangeStart: provider.rangeStart,
+              rangeEnd: provider.rangeEnd,
+              defaultDecoration: defaultDecoration,
+              baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
+            ),
+          )!;
     } else if (isUserPicked) {
       finalDecoration =
-          userPickedDecoration ??
-          selectedModel.decoration.copyWith(color: Colors.teal.shade400);
+          withShapeOf(
+            selectedModel.decoration,
+            userPickedDecoration ??
+                selectedModel.decoration.copyWith(color: Colors.teal.shade400),
+          )!;
     } else {
       finalDecoration = selectedModel.decoration;
     }
@@ -188,13 +202,16 @@ class CalendarDateCell extends StatelessWidget {
         provider.rangeStart == i;
     finalDecoration =
         rangePickHold
-            ? (userPickedDecoration != null
-                ? userPickedDecoration!.copyWith(
-                  color: userPickedDecoration!.color?.withValues(alpha: 128),
-                )
-                : selectedModel.decoration.copyWith(
-                  color: Colors.teal.shade400.withValues(alpha: 128),
-                ))
+            ? withShapeOf(
+              selectedModel.decoration,
+              userPickedDecoration != null
+                  ? userPickedDecoration!.copyWith(
+                    color: userPickedDecoration!.color?.withValues(alpha: 128),
+                  )
+                  : selectedModel.decoration.copyWith(
+                    color: Colors.teal.shade400.withValues(alpha: 128),
+                  ),
+            )!
             : finalDecoration;
 
     return Semantics(

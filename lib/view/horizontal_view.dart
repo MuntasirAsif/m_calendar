@@ -6,6 +6,7 @@ import 'package:provider/provider.dart';
 
 import '../controller/m_calendar_controller.dart';
 import '../model/calendar_animations.dart';
+import '../utils/decoration_shape.dart';
 
 /// Horizontal scrolling calendar view.
 ///
@@ -287,6 +288,30 @@ class _HorizontalViewState extends State<HorizontalView> {
                           !_dateOnly(date).isAfter(_dateOnly(widget.endDate!));
                       final bool isSelectable = isAfterStart && isBeforeEnd;
 
+                      // The resting decoration fixes the shape so the
+                      // AnimatedContainer never lerps between a circle and a
+                      // rounded rectangle.
+                      final restDecoration =
+                          markedModel != null
+                              ? markedModel.decoration
+                              : widget.decoration ??
+                                  BoxDecoration(
+                                    border: Border.all(color: Colors.grey),
+                                    borderRadius: BorderRadius.circular(10),
+                                  );
+                      final tileDecoration =
+                          withShapeOf(
+                            restDecoration,
+                            isSelected
+                                ? widget.userPickedDecoration ??
+                                    BoxDecoration(
+                                      color: Colors.blue,
+                                      borderRadius: BorderRadius.circular(10),
+                                    )
+                                : restDecoration,
+                          ) ??
+                          restDecoration;
+
                       return Semantics(
                         button: isSelectable,
                         enabled: isSelectable,
@@ -303,26 +328,7 @@ class _HorizontalViewState extends State<HorizontalView> {
                             width: 60,
                             height: 60,
                             margin: const EdgeInsets.all(4),
-                            decoration:
-                                isSelected
-                                    ? widget.userPickedDecoration ??
-                                        BoxDecoration(
-                                          color: Colors.blue,
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        )
-                                    : markedModel != null
-                                    ? markedModel.decoration
-                                    : widget.decoration ??
-                                        BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.grey,
-                                          ),
-                                          borderRadius: BorderRadius.circular(
-                                            10,
-                                          ),
-                                        ),
+                            decoration: tileDecoration,
                             alignment: Alignment.center,
                             child:
                                 isSelected

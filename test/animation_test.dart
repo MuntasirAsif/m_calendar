@@ -156,4 +156,84 @@ void main() {
 
     expect(find.byType(AnimatedSize), findsOneWidget);
   });
+
+  testWidgets(
+    'circle marked day with rounded selected decoration does not crash',
+    (WidgetTester tester) async {
+      await tester.pumpWidget(
+        host(
+          MCalendar(
+            selectedMonth: DateTime(2026, 3),
+            animations: const CalendarAnimations(
+              selectionDuration: Duration(milliseconds: 500),
+            ),
+            markedDaysList: [
+              MarkedDaysModel(
+                selectedDateList: [DateTime(2026, 3, 15)],
+                decoration: const BoxDecoration(
+                  color: Colors.blue,
+                  shape: BoxShape.circle,
+                ),
+              ),
+            ],
+            userPickedDecoration: const BoxDecoration(
+              color: Colors.teal,
+              borderRadius: BorderRadius.all(Radius.circular(10)),
+            ),
+            onUserPicked: (_) {},
+          ),
+        ),
+      );
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('15'));
+      await tester.pump(const Duration(milliseconds: 100));
+
+      expect(tester.takeException(), isNull);
+
+      await tester.pumpAndSettle();
+      expect(tester.takeException(), isNull);
+    },
+  );
+
+  testWidgets('range across a circle marked day does not crash', (
+    WidgetTester tester,
+  ) async {
+    await tester.pumpWidget(
+      host(
+        MCalendar(
+          selectedMonth: DateTime(2026, 3),
+          isRangeSelection: true,
+          animations: const CalendarAnimations(
+            selectionDuration: Duration(milliseconds: 500),
+          ),
+          markedDaysList: [
+            MarkedDaysModel(
+              selectedDateList: [DateTime(2026, 3, 15)],
+              decoration: const BoxDecoration(
+                color: Colors.blue,
+                shape: BoxShape.circle,
+              ),
+            ),
+          ],
+          userPickedDecoration: const BoxDecoration(
+            color: Colors.teal,
+            borderRadius: BorderRadius.all(Radius.circular(10)),
+          ),
+          onUserPicked: (_) {},
+        ),
+      ),
+    );
+    await tester.pumpAndSettle();
+
+    await tester.tap(find.text('10'));
+    await tester.pump();
+    await tester.tap(find.text('20'));
+    await tester.pump(const Duration(milliseconds: 100));
+
+    expect(tester.takeException(), isNull);
+
+    await tester.pumpAndSettle();
+    expect(tester.takeException(), isNull);
+  });
 }
