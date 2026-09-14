@@ -40,12 +40,15 @@ void main() {
       findsOneWidget,
     );
     expect(find.text('Monthly — range selection'), findsOneWidget);
-    expect(find.text('Weekly — start day: Sunday'), findsOneWidget);
+    expect(find.text('Weekly — start day: Sunday, animated'), findsOneWidget);
     expect(
-      find.text('Horizontal — auto-scroll to today, marked dates'),
+      find.text('Horizontal — animated, auto-scroll to today'),
       findsOneWidget,
     );
-    expect(find.text('Monthly — opt-in animations'), findsOneWidget);
+    expect(
+      find.text('Monthly — opt-in animations + marked dates'),
+      findsOneWidget,
+    );
     expect(find.text('Nothing picked yet'), findsOneWidget);
   });
 

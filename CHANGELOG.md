@@ -1,3 +1,12 @@
+## [1.5.1]
+
+### Fixed
+- **Animated cells with circle-shaped marked dates** — animating a cell between
+  a circle decoration and a rounded-rectangle selection threw
+  "A circle cannot have a border radius". Cell transitions now keep the resting
+  decoration's shape, so `AnimatedContainer` never lerps into an invalid
+  decoration.
+
 ## [1.5.0]
 
 ### Added
