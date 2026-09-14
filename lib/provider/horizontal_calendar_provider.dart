@@ -69,6 +69,12 @@ class HorizontalCalendarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Clears the current selection.
+  void clearSelection() {
+    _selectedDay = DateTime(0);
+    notifyListeners();
+  }
+
   /// Returns the first [MarkedDaysModel] that contains [date], or `null`
   /// if the date is not marked.
   ///

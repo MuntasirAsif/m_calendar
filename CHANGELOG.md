@@ -1,3 +1,16 @@
+## [1.5.0]
+
+### Added
+- **Opt-in animations** — a new `CalendarAnimations` configuration enables
+  animated selection/range highlights (monthly, weekly, horizontal, and
+  month-picker tiles), a fade + directional slide when the displayed month
+  changes, and smooth grid resizes between months with different row counts.
+  Animations are disabled by default (pass `animations: const CalendarAnimations()`
+  to `MCalendar`, `MCalendar.monthly`, `MCalendar.weekly`, or
+  `MCalendar.horizontal`). `CalendarAnimations.none` disables them explicitly.
+  All durations respect the platform "reduce motion" setting.
+- **Animation demo** — added an opt-in animations section to the example app.
+
 ## [1.4.0]
 
 ### Added
