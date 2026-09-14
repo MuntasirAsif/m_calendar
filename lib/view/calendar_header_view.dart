@@ -68,20 +68,26 @@ class CalendarHeaderView extends StatelessWidget {
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
         IconButton(
+          tooltip: MaterialLocalizations.of(context).previousMonthTooltip,
           icon: Icon(Icons.chevron_left, color: iconColor),
           onPressed: () {
             headerProvider.previousMonth();
             onMonthChanged(headerProvider.selectedMonth);
           },
         ),
-        GestureDetector(
-          onTap: () => _showMonthYearPicker(context, headerProvider),
-          child: Text(
-            formattedMonth,
-            style: textStyle ?? Theme.of(context).textTheme.titleMedium,
+        Semantics(
+          button: true,
+          label: 'Change month',
+          child: GestureDetector(
+            onTap: () => _showMonthYearPicker(context, headerProvider),
+            child: Text(
+              formattedMonth,
+              style: textStyle ?? Theme.of(context).textTheme.titleMedium,
+            ),
           ),
         ),
         IconButton(
+          tooltip: MaterialLocalizations.of(context).nextMonthTooltip,
           icon: Icon(Icons.chevron_right, color: iconColor),
           onPressed: () {
             headerProvider.nextMonth();
@@ -112,11 +118,12 @@ class CalendarHeaderView extends StatelessWidget {
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
                       IconButton(
+                        tooltip: 'Previous year',
                         onPressed: () => setState(() => tempYear--),
                         icon: Icon(Icons.chevron_left, color: iconColor),
                       ),
                       Text(
-                        "$tempYear",
+                        '$tempYear',
                         style:
                             textStyle ??
                             const TextStyle(
@@ -125,6 +132,7 @@ class CalendarHeaderView extends StatelessWidget {
                             ),
                       ),
                       IconButton(
+                        tooltip: 'Next year',
                         onPressed: () => setState(() => tempYear++),
                         icon: Icon(Icons.chevron_right, color: iconColor),
                       ),

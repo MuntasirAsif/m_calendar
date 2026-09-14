@@ -85,10 +85,11 @@ class WeeklyView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<WeeklyCalenderTableProvider>(
+    return Consumer<WeeklyCalendarTableProvider>(
       builder: (_, provider, __) {
         final monthWeekMap = provider.monthWeekMap;
         final months = monthWeekMap.keys.toList();
+        final weekCount = provider.maxWeekCount;
 
         return Table(
           columnWidths: const {
@@ -100,7 +101,7 @@ class WeeklyView extends StatelessWidget {
             TableRow(
               children: [
                 const SizedBox(), // Empty top-left cell
-                ...List.generate(5, (i) {
+                ...List.generate(weekCount, (i) {
                   return Center(
                     child: Padding(
                       padding: const EdgeInsets.symmetric(vertical: 8),
@@ -137,8 +138,8 @@ class WeeklyView extends StatelessWidget {
                     ),
                   ),
 
-                  // Week cells (up to 5 weeks per month)
-                  ...List.generate(5, (i) {
+                  // Week cells (5 or 6 depending on the months shown)
+                  ...List.generate(weekCount, (i) {
                     final week = i < weeks.length ? weeks[i] : [];
                     final firstDate =
                         week.isNotEmpty ? week.first : DateTime(0);

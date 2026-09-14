@@ -3,17 +3,20 @@ import 'package:m_calendar/provider/calendar_header_provider.dart';
 import 'package:m_calendar/view/calendar_header_view.dart';
 import 'package:provider/provider.dart';
 
+import '../controller/m_calendar_controller.dart';
+import '../model/day_state.dart';
+import '../model/marked_date_model.dart';
 import '../provider/monthly_calender_table_provider.dart';
 import '../widgets/calendar_date_cell.dart';
-import '../model/marked_date_model.dart';
 
 /// A widget that displays the monthly calendar view, showing the days of a month
 /// and allowing the user to select dates.
 ///
-/// This widget allows the user to interact with the calendar, selecting individual
-/// dates and providing a callback when dates are selected.
-class MonthlyView extends StatelessWidget {
-  /// Constructs a `MonthlyView` widget.
+/// Supports single date selection, range selection, marked dates, custom day
+/// builders, date disabling (via [minDate], [maxDate], or [isDateDisabled]),
+/// and programmatic control via [MCalendarController].
+class MonthlyView extends StatefulWidget {
+  /// Constructs a [MonthlyView] widget.
   const MonthlyView({
     super.key,
     required this.selectedMonth,
@@ -26,86 +29,159 @@ class MonthlyView extends StatelessWidget {
     this.cellPadding,
     required this.onUserPicked,
     required this.showMonthYearPicker,
+    this.controller,
+    this.dayBuilder,
+    this.minDate,
+    this.maxDate,
+    this.isDateDisabled,
+    this.disabledDecoration,
+    this.disabledTextStyle,
   });
 
   /// The currently selected month for the calendar.
-  ///
-  /// This DateTime object represents the month that will be displayed in the calendar.
   final DateTime selectedMonth;
 
   /// The decoration applied to the calendar container.
-  ///
-  /// This is an optional `BoxDecoration` used to decorate the entire calendar container.
   final BoxDecoration? decoration;
 
   /// A list of custom marked days to highlight in the calendar.
-  ///
-  /// This is an optional list of `MarkedDaysModel` that indicates specific days
-  /// to be highlighted in the calendar, such as holidays or special events.
   final List<MarkedDaysModel>? markedDaysList;
 
   /// The style applied to the week name header (e.g., "Mon", "Tue", "Wed", etc.).
-  ///
-  /// This optional `TextStyle` is used to customize the appearance of the week header row.
   final TextStyle? weekNameHeaderStyle;
 
   /// The default widget to display inside each calendar date cell.
-  ///
-  /// This widget will be displayed inside each date cell if no custom content is provided.
   final Widget? defaultChild;
 
   /// The decoration applied to user-selected dates.
-  ///
-  /// This `BoxDecoration` is used to highlight the selected dates in the calendar.
   final BoxDecoration? userPickedDecoration;
 
   /// The widget displayed inside the cells of the user-selected dates.
-  ///
-  /// This widget is displayed inside the date cells that represent user-selected dates.
   final Widget? userPickedChild;
 
   /// The padding around each calendar cell.
-  ///
-  /// This defines the padding applied to each individual date cell in the calendar.
   final EdgeInsets? cellPadding;
 
   /// A callback triggered when the user selects a date or a range of dates.
-  ///
-  /// This callback provides a list of `DateTime` objects representing the selected dates.
   final void Function(List<DateTime>) onUserPicked;
 
   /// A flag indicating whether to show the month and year picker in the calendar header.
-  ///
-  /// When set to `true`, the month and year picker will be displayed in the calendar header.
-  ///
-  /// Defaults to `true`.
   final bool showMonthYearPicker;
+
+  /// Optional controller to programmatically drive calendar navigation and selections.
+  final MCalendarController? controller;
+
+  /// Optional builder to customize rendering of each day cell.
+  final CalendarDayBuilder? dayBuilder;
+
+  /// Earliest date that can be selected. Earlier dates are disabled.
+  final DateTime? minDate;
+
+  /// Latest date that can be selected. Later dates are disabled.
+  final DateTime? maxDate;
+
+  /// Predicate returning `true` if a given [DateTime] should be disabled.
+  final bool Function(DateTime date)? isDateDisabled;
+
+  /// Custom decoration applied to disabled date cells.
+  final BoxDecoration? disabledDecoration;
+
+  /// Custom text style applied to disabled date numbers.
+  final TextStyle? disabledTextStyle;
+
+  @override
+  State<MonthlyView> createState() => _MonthlyViewState();
+}
+
+class _MonthlyViewState extends State<MonthlyView> {
+  CalendarHeaderProvider? _headerProvider;
+
+  @override
+  void initState() {
+    super.initState();
+    _headerProvider = CalendarHeaderProvider(widget.selectedMonth);
+  }
+
+  @override
+  void didChangeDependencies() {
+    super.didChangeDependencies();
+    final provider = Provider.of<MonthlyCalendarTableProvider>(
+      context,
+      listen: false,
+    );
+    widget.controller?.attach(provider);
+  }
+
+  @override
+  void didUpdateWidget(MonthlyView oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    final provider = Provider.of<MonthlyCalendarTableProvider>(
+      context,
+      listen: false,
+    );
+
+    if (oldWidget.controller != widget.controller) {
+      oldWidget.controller?.detach();
+      widget.controller?.attach(provider);
+    }
+
+    if (oldWidget.selectedMonth.year != widget.selectedMonth.year ||
+        oldWidget.selectedMonth.month != widget.selectedMonth.month) {
+      provider.initializeMonth(
+        widget.selectedMonth,
+        widget.markedDaysList ?? provider.selectedDaysList,
+        provider.isRangeSelection,
+        onUserPicked: widget.onUserPicked,
+        minDate: widget.minDate,
+        maxDate: widget.maxDate,
+        isDateDisabled: widget.isDateDisabled,
+      );
+      _headerProvider?.setMonth(widget.selectedMonth);
+    }
+  }
+
+  @override
+  void dispose() {
+    widget.controller?.detach();
+    _headerProvider?.dispose();
+    super.dispose();
+  }
 
   @override
   Widget build(BuildContext context) {
-    return Consumer<MonthlyCalenderTableProvider>(
+    return Consumer<MonthlyCalendarTableProvider>(
       builder: (_, provider, __) {
+        if (_headerProvider != null &&
+            (_headerProvider!.selectedMonth.year !=
+                    provider.selectedMonth.year ||
+                _headerProvider!.selectedMonth.month !=
+                    provider.selectedMonth.month)) {
+          _headerProvider!.setMonth(provider.selectedMonth);
+        }
+
         return Column(
           children: [
-            if (showMonthYearPicker)
-              ChangeNotifierProvider(
-                create: (BuildContext context) {
-                  return CalendarHeaderProvider(selectedMonth);
-                },
+            if (widget.showMonthYearPicker && _headerProvider != null)
+              ChangeNotifierProvider.value(
+                value: _headerProvider!,
                 child: CalendarHeaderView(
                   onMonthChanged: (value) {
                     provider.initializeMonth(
                       value,
                       provider.selectedDaysList,
                       provider.isRangeSelection,
-                      onUserPicked: onUserPicked,
+                      onUserPicked: widget.onUserPicked,
+                      minDate: widget.minDate,
+                      maxDate: widget.maxDate,
+                      isDateDisabled: widget.isDateDisabled,
                     );
+                    widget.controller?.setMonth(value);
                   },
                 ),
               ),
             Table(
               children: [
-                // Week header row (e.g., "Mon", "Tue", "Wed", etc.)
+                // Week header row (e.g., "Sat", "Sun", "Mon", etc.)
                 TableRow(
                   children:
                       provider.weekNameList.map((name) {
@@ -115,7 +191,7 @@ class MonthlyView extends StatelessWidget {
                             child: Text(
                               name,
                               style:
-                                  weekNameHeaderStyle ??
+                                  widget.weekNameHeaderStyle ??
                                   const TextStyle(
                                     fontWeight: FontWeight.bold,
                                     fontSize: 14,
@@ -136,11 +212,7 @@ class MonthlyView extends StatelessWidget {
   }
 
   /// Generates rows for the calendar, breaking the days of the month into weeks.
-  ///
-  /// This method creates the cells for each day in the month, filling the calendar
-  /// grid by first adding empty spaces before the first day and then adding the
-  /// date cells. The rows are then broken into 7-day groups (weeks).
-  List<TableRow> _generateCalendarRows(MonthlyCalenderTableProvider provider) {
+  List<TableRow> _generateCalendarRows(MonthlyCalendarTableProvider provider) {
     final List<Widget> dayCells = [];
 
     // Fill empty days before the first of the month
@@ -153,26 +225,34 @@ class MonthlyView extends StatelessWidget {
       dayCells.add(
         CalendarDateCell(
           i: i,
-          defaultDecoration: decoration,
-          defaultChild: defaultChild,
-          userPickedDecoration: userPickedDecoration,
-          userPickedChild: userPickedChild,
-          cellPadding: cellPadding,
+          defaultDecoration: widget.decoration,
+          defaultChild: widget.defaultChild,
+          userPickedDecoration: widget.userPickedDecoration,
+          userPickedChild: widget.userPickedChild,
+          cellPadding: widget.cellPadding,
+          dayBuilder: widget.dayBuilder,
+          disabledDecoration: widget.disabledDecoration,
+          disabledTextStyle: widget.disabledTextStyle,
         ),
       );
     }
 
-    // Fill empty cells after the last day of the month
-    while (dayCells.length % 7 != 0) {
-      dayCells.add(const SizedBox.shrink());
-    }
-
-    // Break the cells into weeks (7 cells per week)
-    final List<TableRow> rows = [];
+    // Break day cells into 7-day groups (weeks)
+    final List<TableRow> calendarRows = [];
     for (int i = 0; i < dayCells.length; i += 7) {
-      rows.add(TableRow(children: dayCells.sublist(i, i + 7)));
+      final List<Widget> weekRow = dayCells.sublist(
+        i,
+        i + 7 > dayCells.length ? dayCells.length : i + 7,
+      );
+
+      // Pad remaining days in the last row to maintain 7 columns
+      while (weekRow.length < 7) {
+        weekRow.add(const SizedBox.shrink());
+      }
+
+      calendarRows.add(TableRow(children: weekRow));
     }
 
-    return rows;
+    return calendarRows;
   }
 }

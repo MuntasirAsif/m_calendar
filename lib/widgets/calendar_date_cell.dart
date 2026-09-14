@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import '../model/day_state.dart';
 import '../model/marked_date_model.dart';
 import '../provider/monthly_calender_table_provider.dart';
 import '../utils/range_decoration.dart';
@@ -26,6 +27,9 @@ class CalendarDateCell extends StatelessWidget {
     this.userPickedDecoration,
     this.userPickedChild,
     this.cellPadding,
+    this.dayBuilder,
+    this.disabledDecoration,
+    this.disabledTextStyle,
   });
 
   /// The day of the month represented by this cell (1-based index).
@@ -49,9 +53,18 @@ class CalendarDateCell extends StatelessWidget {
   /// Padding applied to the cell content.
   final EdgeInsets? cellPadding;
 
+  /// Optional builder to customize rendering of this day cell.
+  final CalendarDayBuilder? dayBuilder;
+
+  /// Custom decoration applied when the day is disabled.
+  final BoxDecoration? disabledDecoration;
+
+  /// Custom text style applied to the day number when disabled.
+  final TextStyle? disabledTextStyle;
+
   @override
   Widget build(BuildContext context) {
-    final provider = Provider.of<MonthlyCalenderTableProvider>(context);
+    final provider = Provider.of<MonthlyCalendarTableProvider>(context);
     final currentDate = DateTime(
       provider.selectedMonth.year,
       provider.selectedMonth.month,
@@ -77,44 +90,89 @@ class CalendarDateCell extends StatelessWidget {
           ),
     );
 
-    final bool isUserPicked = provider.userPicked == i;
-    final bool isInRange = provider.isRangeSelection && provider.isInRange(i);
+    final bool isDisabled = provider.isDayDisabled(i);
+    final now = DateTime.now();
+    final bool isToday =
+        currentDate.year == now.year &&
+        currentDate.month == now.month &&
+        currentDate.day == now.day;
+    final bool isUserPicked = !isDisabled && provider.userPicked == i;
+    final bool isInRange =
+        !isDisabled && provider.isRangeSelection && provider.isInRange(i);
+    final bool isRangeStart = provider.rangeStart == i;
+    final bool isRangeEnd = provider.rangeEnd == i;
 
-    BoxDecoration finalDecoration =
-        isInRange
-            ? getRangeDecoration(
-              context: context,
-              i: i,
-              rangeStart: provider.rangeStart,
-              rangeEnd: provider.rangeEnd,
-              defaultDecoration: defaultDecoration,
-              baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
-            )
-            : isUserPicked
-            ? userPickedDecoration ??
-                selectedModel.decoration.copyWith(color: Colors.teal.shade400)
-            : selectedModel.decoration;
+    final state = DayState(
+      date: currentDate,
+      isSelected: isUserPicked,
+      isToday: isToday,
+      isDisabled: isDisabled,
+      isInRange: isInRange,
+      isRangeStart: isRangeStart,
+      isRangeEnd: isRangeEnd,
+      markedModel:
+          selectedModel.selectedDateList.isNotEmpty ? selectedModel : null,
+    );
+
+    final Widget? customContent = dayBuilder?.call(context, currentDate, state);
+
+    BoxDecoration finalDecoration;
+    if (isDisabled) {
+      finalDecoration =
+          disabledDecoration ??
+          defaultDecoration ??
+          BoxDecoration(
+            color: Colors.transparent,
+            borderRadius: BorderRadius.circular(6),
+          );
+    } else if (isInRange) {
+      finalDecoration = getRangeDecoration(
+        context: context,
+        i: i,
+        rangeStart: provider.rangeStart,
+        rangeEnd: provider.rangeEnd,
+        defaultDecoration: defaultDecoration,
+        baseColor: userPickedDecoration?.color ?? Colors.teal.shade400,
+      );
+    } else if (isUserPicked) {
+      finalDecoration =
+          userPickedDecoration ??
+          selectedModel.decoration.copyWith(color: Colors.teal.shade400);
+    } else {
+      finalDecoration = selectedModel.decoration;
+    }
 
     final Widget finalChild =
-        (isUserPicked || isInRange)
+        customContent ??
+        (isDisabled
+            ? Center(
+              child: Text(
+                i.toString(),
+                style:
+                    disabledTextStyle ??
+                    TextStyle(color: Theme.of(context).disabledColor),
+              ),
+            )
+            : (isUserPicked || isInRange)
             ? userPickedChild ??
                 userSelectedItemStyle ??
                 defaultChild ??
                 Center(child: Text(i.toString()))
             : selectedModel.child ??
                 defaultChild ??
-                Center(child: Text(i.toString()));
+                Center(child: Text(i.toString())));
 
     final EdgeInsets finalMargin =
         isInRange
-            ? const EdgeInsets.symmetric(horizontal: 0, vertical: 4)
+            ? const EdgeInsets.symmetric(vertical: 4)
             : const EdgeInsets.all(4);
     final EdgeInsets finalPadding =
         isInRange && cellPadding != null
             ? EdgeInsets.zero
             : cellPadding ?? const EdgeInsets.all(12);
 
-    bool rangePickHold =
+    final bool rangePickHold =
+        !isDisabled &&
         provider.rangeStart != null &&
         provider.rangeEnd == null &&
         provider.rangeStart == i;
@@ -129,13 +187,19 @@ class CalendarDateCell extends StatelessWidget {
                 ))
             : finalDecoration;
 
-    return GestureDetector(
-      onTap: () => provider.toggleUserPicked(i),
-      child: Container(
-        padding: finalPadding,
-        margin: finalMargin,
-        decoration: finalDecoration,
-        child: finalChild,
+    return Semantics(
+      button: !isDisabled,
+      enabled: !isDisabled,
+      selected: isUserPicked || isInRange,
+      label: currentDate.toString().split(' ').first,
+      child: GestureDetector(
+        onTap: isDisabled ? null : () => provider.toggleUserPicked(i),
+        child: Container(
+          padding: finalPadding,
+          margin: finalMargin,
+          decoration: finalDecoration,
+          child: finalChild,
+        ),
       ),
     );
   }

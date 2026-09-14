@@ -38,8 +38,10 @@ class HorizontalCalendarProvider extends ChangeNotifier {
   DateTime get selectedDay => _selectedDay;
 
   /// Updates the selected month and notifies listeners.
+  ///
+  /// Only the year and month of [month] are used; day and time are ignored.
   void setSelectedMonth(DateTime month) {
-    _selectedMonth = month;
+    _selectedMonth = DateTime(month.year, month.month);
     notifyListeners();
   }
 
@@ -67,20 +69,26 @@ class HorizontalCalendarProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Returns the first [MarkedDaysModel] that contains [date], or `null`
+  /// if the date is not marked.
+  ///
+  /// Dates are compared by year/month/day only; time is ignored.
+  MarkedDaysModel? markedModelFor(DateTime date) {
+    final list = markedDaysList;
+    if (list == null) return null;
+
+    for (final marked in list) {
+      final matches = marked.selectedDateList.any(
+        (d) =>
+            d.year == date.year && d.month == date.month && d.day == date.day,
+      );
+      if (matches) return marked;
+    }
+    return null;
+  }
+
   /// Returns `true` if the given [date] exists inside [markedDaysList].
   ///
   /// Used to visually highlight marked dates in UI.
-  bool isMarked(DateTime date) {
-    if (markedDaysList == null) return false;
-
-    for (var marked in markedDaysList!) {
-      if (marked.selectedDateList.any(
-        (d) =>
-            d.year == date.year && d.month == date.month && d.day == date.day,
-      )) {
-        return true;
-      }
-    }
-    return false;
-  }
+  bool isMarked(DateTime date) => markedModelFor(date) != null;
 }

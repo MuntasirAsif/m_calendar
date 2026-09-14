@@ -1,3 +1,71 @@
+## [1.4.0]
+
+### Added
+- **`MCalendarController`** — imperative controller enabling external navigation
+  (`nextMonth()`, `previousMonth()`, `setMonth()`), programmatic selection
+  (`selectDate()`, `selectRange()`, `clearSelection()`), and selection queries.
+- **`dayBuilder` & `DayState`** — allows developers to supply a `CalendarDayBuilder`
+  to render completely custom widgets for calendar day cells with state access
+  (selected, today, disabled, in-range, marked).
+- **Disabled dates** — added `minDate`, `maxDate`, `isDateDisabled`, `disabledDecoration`,
+  and `disabledTextStyle` to restrict selectable ranges and style disabled cells.
+- **Barrel exports** — `MCalendarController`, `DayState`, `CalendarDayBuilder`,
+  `MarkedDaysModel`, and `Day` are now re-exported from
+  `package:m_calendar/m_calendar.dart`. Separate sub-package imports are no
+  longer needed.
+- **`markedModelFor` on `HorizontalCalendarProvider`** — returns the first
+  matching `MarkedDaysModel` for a given date, enabling per-model decoration
+  in the horizontal view.
+- **`maxWeekCount` on `WeeklyCalendarTableProvider`** — exposes the number of
+  week columns required (5 or 6) so the view can render all rows without
+  truncating months that span 6 weeks.
+- **`assert` for invalid horizontal date range** — passing `initialDate` after
+  `endDate` now throws a clear debug assertion instead of silently misbehaving.
+- **Accessibility** — added `Semantics(button, enabled, selected, label)` wrappers on
+  monthly date cells; added `tooltip` to all header `IconButton`s using
+  `MaterialLocalizations` where available.
+- **Tests** — expanded test suite with 33 automated tests covering monthly
+  normalization, leap years, range selection (sorted/same-day/reset), weekly
+  6-week months, year-wrap, marked-date lookup, controller navigation, custom day
+  builders, disabled dates, and deprecated aliases.
+
+### Fixed
+- **6-week month data loss** — `WeeklyCalendarTableProvider` previously dropped
+  the 6th week of months that span 6 calendar rows. All days are now preserved
+  and the table header adapts automatically.
+- **Horizontal marked-date decoration** — the horizontal view previously always
+  used `markedDaysList.first.decoration` for every marked date, regardless of
+  which model actually matched. It now uses the correct model's decoration.
+- **Horizontal `isSelected` year check** — date equality now compares year,
+  month, and day; previously only month and day were compared, causing false
+  matches across different years.
+- **Date normalization** — `initializeMonth` on both monthly and weekly
+  providers now strips the day/time components from `selectedMonth`, so
+  `DateTime(2024, 3, 15, 10, 30)` and `DateTime(2024, 3)` produce identical
+  state.
+- **`setSelectedMonth` normalization** — `HorizontalCalendarProvider` now
+  normalizes the incoming month to year/month only.
+
+### Changed
+- **`MonthlyCalenderTableProvider` → `MonthlyCalendarTableProvider`** —
+  corrected the "calender" typo. The old name is kept as a `@Deprecated`
+  typedef alias for backward compatibility.
+- **`WeeklyCalenderTableProvider` → `WeeklyCalendarTableProvider`** — same
+  typo fix with a `@Deprecated` alias.
+- **Weekly week map is now cached** — `_generateWeeksByMonth()` runs once in
+  `initializeMonth` instead of being re-evaluated on every getter access.
+- **Header `IconButton` tooltips** — previous/next month buttons now carry
+  tooltips from `MaterialLocalizations` (screen-reader friendly).
+- **`Semantics` on date cells** — monthly date cells now expose
+  `button: true`, `selected`, and a `label` with the ISO date string to
+  assistive technologies.
+
+### Deprecated
+- `MonthlyCalenderTableProvider` — use `MonthlyCalendarTableProvider`.
+- `WeeklyCalenderTableProvider` — use `WeeklyCalendarTableProvider`.
+
+---
+
 ## [1.3.5]
 - Add horizontal view calendar with custom decoration
 - Update Redme.md

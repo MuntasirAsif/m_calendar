@@ -1,10 +1,43 @@
+analyzer:
+  exclude:
+    - build/**
+    - android/**
+    - ios/**
+    - web/**
+    - windows/**
+    - macos/**
+    - linux/**
+
 include: package:flutter_lints/flutter.yaml
 
 linter:
   rules:
+    # Documentation
     public_member_api_docs: true
+
+    # Style
     sort_constructors_first: true
     always_declare_return_types: true
-    avoid_print: true
     prefer_const_constructors: true
+    prefer_const_declarations: true
     use_key_in_widget_constructors: true
+    sized_box_for_whitespace: true
+    prefer_single_quotes: true
+
+    # Safety
+    avoid_print: true
+    avoid_dynamic_calls: true
+    cancel_subscriptions: true
+    close_sinks: true
+    unawaited_futures: true
+
+    # Null safety
+    prefer_null_aware_operators: true
+    unnecessary_null_checks: true
+    avoid_null_checks_in_equality_operators: true
+
+    # Code quality
+    avoid_redundant_argument_values: true
+    avoid_unused_constructor_parameters: true
+    prefer_final_locals: true
+    prefer_final_fields: true
