@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import '../utils/decoration_shape.dart';
 
 /// A widget that represents an individual date cell in the weekly calendar view.
 ///
@@ -63,14 +64,20 @@ class WeeklyCalendarDateCell extends StatelessWidget {
     final isBlank = firstDate.year == 0;
 
     // Decides the decoration based on whether the cell is selected or not.
+    // The resting decoration fixes the shape so the AnimatedContainer never
+    // lerps between a circle and a rounded rectangle.
     final decoration =
-        isSelected
-            ? userPickedDecoration ??
-                BoxDecoration(
-                  color: Colors.teal,
-                  borderRadius: BorderRadius.circular(6),
-                )
-            : defaultDecoration ?? const BoxDecoration();
+        withShapeOf(
+          defaultDecoration,
+          isSelected
+              ? userPickedDecoration ??
+                  BoxDecoration(
+                    color: Colors.teal,
+                    borderRadius: BorderRadius.circular(6),
+                  )
+              : defaultDecoration ?? const BoxDecoration(),
+        ) ??
+        const BoxDecoration();
 
     // Sets the child content for the cell, depending on whether the cell is blank or selected.
     final child =
