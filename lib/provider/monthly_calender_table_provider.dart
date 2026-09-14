@@ -1,21 +1,43 @@
 import 'package:flutter/material.dart';
 import '../model/marked_date_model.dart';
+import 'weekly_calendar_table_provider.dart' show Day;
 
 /// A [ChangeNotifier] that manages calendar state, including selected month,
 /// selected dates, and range selection.
 ///
 /// Used to control and update a custom calendar widget.
 class MonthlyCalendarTableProvider extends ChangeNotifier {
-  /// A fixed list of week day labels starting from Saturday.
-  final List<String> weekNameList = [
-    'Sat',
-    'Sun',
-    'Mon',
-    'Tue',
-    'Wed',
-    'Thu',
-    'Fri',
-  ];
+  /// The starting day of the week for the monthly view (defaults to [Day.saturday]).
+  Day startDay = Day.saturday;
+
+  /// Ordered weekday labels matching the configured [startDay].
+  List<String> get weekNameList {
+    const allDays = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    final startIndex = switch (startDay) {
+      Day.monday => 0,
+      Day.tuesday => 1,
+      Day.wednesday => 2,
+      Day.thursday => 3,
+      Day.friday => 4,
+      Day.saturday => 5,
+      Day.sunday => 6,
+    };
+    return [...allDays.sublist(startIndex), ...allDays.sublist(0, startIndex)];
+  }
+
+  /// Calculates the leading blank cells for a month given its first day and start day.
+  static int calculateStartOffset(DateTime firstDay, Day startDay) {
+    final startWeekday = switch (startDay) {
+      Day.monday => 1,
+      Day.tuesday => 2,
+      Day.wednesday => 3,
+      Day.thursday => 4,
+      Day.friday => 5,
+      Day.saturday => 6,
+      Day.sunday => 7,
+    };
+    return (firstDay.weekday - startWeekday + 7) % 7;
+  }
 
   late int _startOffset;
   late int _totalDays;
@@ -89,8 +111,8 @@ class MonthlyCalendarTableProvider extends ChangeNotifier {
   }
 
   /// Initializes the calendar with a specific [selectedMonth], optional marked days [customList],
-  /// and a selection mode flag [isRange]. Also registers an optional [onUserPicked] callback
-  /// and date disabling rules.
+  /// and a selection mode flag [isRange]. Also registers an optional [onUserPicked] callback,
+  /// date disabling rules, and week [startDay].
   void initializeMonth(
     DateTime selectedMonth,
     List<MarkedDaysModel>? customList,
@@ -99,11 +121,14 @@ class MonthlyCalendarTableProvider extends ChangeNotifier {
     DateTime? minDate,
     DateTime? maxDate,
     bool Function(DateTime date)? isDateDisabled,
+    Day startDay = Day.saturday,
+    bool notify = true,
   }) {
+    this.startDay = startDay;
     // Normalize: only year and month are relevant for a month view.
     _selectedMonth = DateTime(selectedMonth.year, selectedMonth.month);
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month);
-    _startOffset = (firstDay.weekday % 7);
+    _startOffset = calculateStartOffset(firstDay, startDay);
     _totalDays = DateUtils.getDaysInMonth(
       _selectedMonth.year,
       _selectedMonth.month,
@@ -118,14 +143,14 @@ class MonthlyCalendarTableProvider extends ChangeNotifier {
     _userPicked = null;
     _rangeStart = null;
     _rangeEnd = null;
-    notifyListeners();
+    if (notify) notifyListeners();
   }
 
   /// Programmatically changes the displayed month without resetting callbacks.
   void setMonth(DateTime month) {
     _selectedMonth = DateTime(month.year, month.month);
     final firstDay = DateTime(_selectedMonth.year, _selectedMonth.month);
-    _startOffset = (firstDay.weekday % 7);
+    _startOffset = calculateStartOffset(firstDay, startDay);
     _totalDays = DateUtils.getDaysInMonth(
       _selectedMonth.year,
       _selectedMonth.month,
@@ -136,31 +161,91 @@ class MonthlyCalendarTableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  /// Programmatically selects a [date] within the currently displayed month.
+  /// Programmatically selects a [date], automatically switching months if needed.
+  ///
+  /// The time component of [date] is ignored. Dart normalizes out-of-range
+  /// arguments (e.g. February 30 resolves to March 1), so the resulting
+  /// canonical date is selected. Disabled dates are ignored.
   void selectDate(DateTime date) {
-    if (date.year == _selectedMonth.year &&
-        date.month == _selectedMonth.month) {
-      if (!isDayDisabled(date.day)) {
-        _userPicked = date.day;
-        _onUserPickedCallback?.call([date]);
-        notifyListeners();
-      }
+    final target = _dateOnly(date);
+    if (target.year != _selectedMonth.year ||
+        target.month != _selectedMonth.month) {
+      setMonth(target);
+    }
+    if (!isDayDisabled(target.day)) {
+      _userPicked = target.day;
+      _onUserPickedCallback?.call([_getDateFromIndex(target.day)]);
+      notifyListeners();
     }
   }
 
-  /// Programmatically selects a range between [start] and [end] within the currently displayed month.
+  /// Programmatically selects a range between [start] and [end], automatically
+  /// switching months if needed.
+  ///
+  /// Both are normalized to date-only values and the shorter end is never
+  /// assumed: the range is always sorted. The selection and the [onUserPicked]
+  /// callback are confined to the month of the earlier date; if [end] falls in
+  /// a later month the range is truncated to the end of [start]'s month.
+  /// Out-of-range arguments are normalized by Dart (e.g. February 30 becomes
+  /// March 1).
   void selectRange(DateTime start, DateTime end) {
-    if (start.year == _selectedMonth.year &&
-        start.month == _selectedMonth.month &&
-        end.year == _selectedMonth.year &&
-        end.month == _selectedMonth.month) {
-      final s = start.day <= end.day ? start.day : end.day;
-      final e = start.day <= end.day ? end.day : start.day;
-      _rangeStart = s;
-      _rangeEnd = e;
-      _onUserPickedCallback?.call(_getSelectedRangeDates());
-      notifyListeners();
+    final s = _dateOnly(start);
+    final e = _dateOnly(end);
+    final earlier = s.isBefore(e) ? s : e;
+    final later = s.isBefore(e) ? e : s;
+    final sameMonth =
+        later.year == earlier.year && later.month == earlier.month;
+    if (sameMonth) {
+      if (earlier.year != _selectedMonth.year ||
+          earlier.month != _selectedMonth.month) {
+        setMonth(earlier);
+      }
+      _rangeStart = earlier.day;
+      _rangeEnd = later.day;
+    } else {
+      // Cross-month ranges highlight up to the end of the start month.
+      if (earlier.year != _selectedMonth.year ||
+          earlier.month != _selectedMonth.month) {
+        setMonth(earlier);
+      }
+      _rangeStart = earlier.day;
+      _rangeEnd = DateUtils.getDaysInMonth(earlier.year, earlier.month);
     }
+    _onUserPickedCallback?.call(_getSelectedRangeDates());
+    notifyListeners();
+  }
+
+  /// Updates the disabling rules, marked days, and pick callback without
+  /// resetting the current selection.
+  ///
+  /// Contrast this with [initializeMonth]/[setMonth], which clear any existing
+  /// selection. Passing `null` clears the respective disabling rule.
+  void updateConfiguration({
+    DateTime? minDate,
+    DateTime? maxDate,
+    bool Function(DateTime date)? isDateDisabled,
+    List<MarkedDaysModel>? markedDaysList,
+    bool notify = true,
+  }) {
+    var changed = false;
+    if (this.minDate != minDate) {
+      this.minDate = minDate;
+      changed = true;
+    }
+    if (this.maxDate != maxDate) {
+      this.maxDate = maxDate;
+      changed = true;
+    }
+    if (this.isDateDisabled != isDateDisabled) {
+      this.isDateDisabled = isDateDisabled;
+      changed = true;
+    }
+    if (markedDaysList != null &&
+        !identical(selectedDaysList, markedDaysList)) {
+      selectedDaysList = markedDaysList;
+      changed = true;
+    }
+    if (changed && notify) notifyListeners();
   }
 
   /// Clears the current user selection.
@@ -226,6 +311,10 @@ class MonthlyCalendarTableProvider extends ChangeNotifier {
   DateTime _getDateFromIndex(int index) {
     return DateTime(_selectedMonth.year, _selectedMonth.month, index);
   }
+
+  /// Returns a date-only copy of [date] (time components removed).
+  static DateTime _dateOnly(DateTime date) =>
+      DateTime(date.year, date.month, date.day);
 
   /// Generates a list of [DateTime]s within the user-selected range.
   ///

@@ -21,6 +21,9 @@ class DayState {
   /// The date represented by this cell.
   final DateTime date;
 
+  /// Convenience getter for the day-of-month number (1..31).
+  int get day => date.day;
+
   /// Whether this day is currently selected (single selection or endpoint of range).
   final bool isSelected;
 

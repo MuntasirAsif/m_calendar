@@ -226,4 +226,156 @@ void main() {
     expect(picked, isNotNull);
     expect(picked!.single, DateTime(2026, 3, 12));
   });
+
+  testWidgets(
+    'horizontal view disables days outside initialDate/endDate range',
+    (WidgetTester tester) async {
+      // Widen the surface so the lazily-built horizontal list renders all days.
+      tester.view.physicalSize = const Size(4000, 600);
+      tester.view.devicePixelRatio = 1.0;
+      addTearDown(tester.view.reset);
+
+      DateTime? picked;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: SizedBox(
+              width: 2000,
+              height: 100,
+              child: MCalendar.horizontal(
+                selectedMonth: DateTime(2026, 2),
+                onUserPicked: (d) => picked = d,
+                endDate: DateTime(2026, 2, 15),
+              ),
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('15'));
+      await tester.pumpAndSettle();
+      expect(picked, DateTime(2026, 2, 15));
+
+      picked = null;
+      await tester.tap(find.text('16'));
+      await tester.pumpAndSettle();
+      expect(picked, isNull);
+    },
+  );
+
+  testWidgets(
+    'monthly config propagation preserves range and enables new cells',
+    (WidgetTester tester) async {
+      List<DateTime>? picked;
+
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MCalendar.monthly(
+              selectedMonth: DateTime(2026, 3),
+              isRangeSelection: true,
+              onUserPicked: (dates) => picked = dates,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      await tester.tap(find.text('12'));
+      await tester.pumpAndSettle();
+      await tester.tap(find.text('15'));
+      await tester.pumpAndSettle();
+
+      expect(picked, isNotNull);
+      expect(picked!.first, DateTime(2026, 3, 12));
+      expect(picked!.last, DateTime(2026, 3, 15));
+
+      // Rebuild with a stricter minDate that disables day 12.
+      await tester.pumpWidget(
+        MaterialApp(
+          home: Scaffold(
+            body: MCalendar.monthly(
+              selectedMonth: DateTime(2026, 3),
+              isRangeSelection: true,
+              minDate: DateTime(2026, 3, 18),
+              onUserPicked: (dates) => picked = dates,
+            ),
+          ),
+        ),
+      );
+
+      await tester.pumpAndSettle();
+
+      // Day 12 is now disabled and cannot start a new range.
+      await tester.tap(find.text('12'));
+      await tester.pumpAndSettle();
+      expect(picked, isNotNull);
+      expect(picked!.first, DateTime(2026, 3, 12));
+
+      // Day 20 is selectable and begins a new range.
+      picked = null;
+      await tester.tap(find.text('20'));
+      await tester.pumpAndSettle();
+      expect(picked, isNull);
+
+      await tester.tap(find.text('25'));
+      await tester.pumpAndSettle();
+      expect(picked, isNotNull);
+      expect(picked!.first, DateTime(2026, 3, 20));
+      expect(picked!.last, DateTime(2026, 3, 25));
+    },
+  );
+
+  testWidgets('controller replacement attaches the new controller', (
+    WidgetTester tester,
+  ) async {
+    final controllerA = MCalendarController();
+    final controllerB = MCalendarController();
+
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MCalendar.monthly(
+            controller: controllerA,
+            selectedMonth: DateTime(2026, 3),
+            onUserPicked: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+    expect(find.text('March 2026'), findsOneWidget);
+
+    // Rebuild with controllerB.
+    await tester.pumpWidget(
+      MaterialApp(
+        home: Scaffold(
+          body: MCalendar.monthly(
+            controller: controllerB,
+            selectedMonth: DateTime(2026, 3),
+            onUserPicked: (_) {},
+          ),
+        ),
+      ),
+    );
+
+    await tester.pumpAndSettle();
+
+    controllerB.setMonth(DateTime(2026, 8));
+    await tester.pumpAndSettle();
+    expect(find.text('August 2026'), findsOneWidget);
+
+    // ControllerA should be detached and not driving the view.
+    controllerA.setMonth(DateTime(2027, 12));
+    await tester.pumpAndSettle();
+    expect(find.text('August 2026'), findsOneWidget);
+
+    controllerA.dispose();
+    controllerB.dispose();
+  });
 }

@@ -122,6 +122,23 @@ class WeeklyCalendarTableProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  /// Updates the displayed month and re-computes the 6-month table window.
+  void setSelectedMonth(DateTime month) {
+    initializeMonth(
+      month,
+      startedDay,
+      selectedDaysList,
+      isRangeSelection,
+      onUserPicked: _onUserPickedCallback,
+    );
+  }
+
+  /// Clears the current user selection.
+  void clearSelection() {
+    _userPicked = null;
+    notifyListeners();
+  }
+
   /// Generates weeks for the selected month (and the 5 preceding months)
   /// based on the configured [startedDay].
   Map<String, List<List<DateTime>>> _generateWeeksByMonth() {
@@ -181,8 +198,10 @@ class WeeklyCalendarTableProvider extends ChangeNotifier {
       Day.saturday => DateTime.saturday,
       Day.sunday => DateTime.sunday,
     };
-    // The week ends one day before it starts (wrapping 1..7).
-    return start == DateTime.sunday ? DateTime.saturday : start - 1;
+    // The week ends one day before the start day (wrapping 7 → 1).
+    // A Sunday-starting week ends on Saturday; a Monday-starting week ends
+    // on Sunday (weekday 7). Anything else ends on `start - 1`.
+    return start == DateTime.monday ? DateTime.sunday : start - 1;
   }
 
   /// Converts a numerical month value to its string abbreviation (e.g., 1 -> 'JAN').
